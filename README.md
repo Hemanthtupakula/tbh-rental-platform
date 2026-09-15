@@ -1,4 +1,4 @@
-﻿# TBH — "Ride Beyond Limits" 🏍️ 🚗 ⚡
+# TBH — "Ride Beyond Limits" 🏍️ 🚗 ⚡
 ### Ultra-Premium Indian Bike & Car Rental Full-Stack Platform
 
 TBH is an elite, high-end vehicle rental platform built specifically for Indian metropolises and destinations. It features interactive WebGL 3D vehicle visualization (Three.js), transparent hourly, daily, and monthly rental pricing in Rupees (₹), driving license KYC verification, and full-stack Java Spring Boot architecture.
@@ -103,3 +103,5 @@ bike-rental/
 
 ## 🛡️ License & Parivahan Compliance
 All vehicles comply with the Motor Vehicles (Rent a Cab / Rent a Motorcycle) Scheme under the Ministry of Road Transport and Highways, Government of India.
+
+<!-- Cloudflare Pages deployment trigger: 2026-09-15 -->
