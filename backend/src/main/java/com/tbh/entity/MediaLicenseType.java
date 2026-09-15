@@ -1,0 +1,8 @@
+package com.tbh.entity;
+
+public enum MediaLicenseType {
+    COLLEGE_DEMO_REFERENCE,
+    COMMERCIAL_PARTNER_LICENSE,
+    OFFICIAL_MANUFACTURER_PRESS,
+    OPEN_COMMERCIAL_LICENSE
+}

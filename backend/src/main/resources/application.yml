@@ -1,0 +1,137 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: tbh-rental-backend
+  profiles:
+    active: dev
+
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:tbh}?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Kolkata
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:Sheshadri@1}
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 30000
+      connection-timeout: 20000
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
+    locations: classpath:db/migration
+
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+
+tbh:
+  jwt:
+    secret: ${TBH_JWT_SECRET:tbh-ride-beyond-limits-super-secret-key-2026-production-grade-encryption}
+    access-token-expiration-ms: 900000       # 15 minutes (short-lived access token)
+    refresh-token-expiration-ms: 604800000   # 7 days (secure refresh token)
+  security:
+    allowed-origins: ${TBH_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173}
+  otp:
+    provider: ${TBH_OTP_PROVIDER:sms}
+  sms:
+    api-key: ${TBH_SMS_API_KEY:OcNLHayXvZE2Sq6C0MUYTI3dKl5e7iD8rVRuWojxtgwfmJ9znpNwU6eFzsAgPcoqJ5L0Ty1RjYQulZpC}
+    sender-id: ${TBH_SMS_SENDER_ID:TBHIND}
+    route: ${TBH_SMS_ROUTE:otp}
+    dlt-template-id: ${TBH_SMS_DLT_TEMPLATE_ID:}
+  payment:
+    provider: ${TBH_PAYMENT_PROVIDER:razorpay}
+  razorpay:
+    key-id: ${RAZORPAY_KEY_ID:}
+    key-secret: ${RAZORPAY_KEY_SECRET:}
+    webhook-secret: ${RAZORPAY_WEBHOOK_SECRET:}
+  email:
+    provider: ${TBH_EMAIL_PROVIDER:mock}
+    api-key: ${RESEND_API_KEY:${TBH_EMAIL_API_KEY:}}
+    from: ${TBH_EMAIL_FROM:TBH Rentals <onboarding@resend.dev>}
+  kyc:
+    provider: ${TBH_KYC_PROVIDER:production}
+  imagekit:
+    endpoint: ${IMAGEKIT_URL_ENDPOINT:https://ik.imagekit.io/hemanthhkt}
+    public-key: ${IMAGEKIT_PUBLIC_KEY:public_NS0dUSt2SSRtcWhuLkyPHEKUjz0=}
+    private-key: ${IMAGEKIT_PRIVATE_KEY:private_4+QFj7YnGA5RXndCo3k5JW4zUDM=}
+    id: ${IMAGEKIT_ID:hemanthhkt}
+  clerk:
+    issuer: ${CLERK_ISSUER:https://deep-zebra-6151.clerk.accounts.dev}
+    jwks-uri: ${CLERK_JWKS_URI:https://deep-zebra-6151.clerk.accounts.dev/.well-known/jwks.json}
+    secret-key: ${CLERK_SECRET_KEY:sk_test_E6CSavcSH2fkdo1j1QM0YzAvvj4LDIuN2hjWDgFenc}
+    publishable-key: ${CLERK_PUBLISHABLE_KEY:pk_test_ZGVlcC16ZWJyYS02MTUxLmNsZXJrLmFjY291bnRzLmRldiQ}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:tbh}?createDatabaseIfNotExist=true&useSSL=${DB_USE_SSL:false}&allowPublicKeyRetrieval=${DB_ALLOW_PUBLIC_KEY_RETRIEVAL:true}&serverTimezone=Asia/Kolkata
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: false
+    baseline-version: 0
+    locations: classpath:db/migration
+
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+
+tbh:
+  jwt:
+    secret: ${TBH_JWT_SECRET}
+    access-token-expiration-ms: 900000
+    refresh-token-expiration-ms: 604800000
+  security:
+    allowed-origins: ${TBH_ALLOWED_ORIGINS:http://localhost,http://localhost:80,http://localhost:3000,http://localhost:5173,http://127.0.0.1}
+  otp:
+    provider: ${TBH_OTP_PROVIDER:sms}
+  sms:
+    api-key: ${TBH_SMS_API_KEY:}
+    sender-id: ${TBH_SMS_SENDER_ID:TBHIND}
+    route: ${TBH_SMS_ROUTE:dlt}
+    dlt-template-id: ${TBH_SMS_DLT_TEMPLATE_ID:}
+  payment:
+    provider: ${TBH_PAYMENT_PROVIDER:razorpay}
+  kyc:
+    provider: ${TBH_KYC_PROVIDER:production}
+  email:
+    provider: ${TBH_EMAIL_PROVIDER:resend}
+    api-key: ${TBH_EMAIL_API_KEY:}
+    from: ${TBH_EMAIL_FROM:TBH Rentals <onboarding@resend.dev>}
+  imagekit:
+    endpoint: ${IMAGEKIT_URL_ENDPOINT:https://ik.imagekit.io/hemanthhkt}
+    public-key: ${IMAGEKIT_PUBLIC_KEY:public_NS0dUSt2SSRtcWhuLkyPHEKUjz0=}
+    private-key: ${IMAGEKIT_PRIVATE_KEY:}
+    id: ${IMAGEKIT_ID:hemanthhkt}
+  clerk:
+    issuer: ${CLERK_ISSUER:https://deep-zebra-6151.clerk.accounts.dev}
+    jwks-uri: ${CLERK_JWKS_URI:https://deep-zebra-6151.clerk.accounts.dev/.well-known/jwks.json}
+    secret-key: ${CLERK_SECRET_KEY:}
+    publishable-key: ${CLERK_PUBLISHABLE_KEY:}

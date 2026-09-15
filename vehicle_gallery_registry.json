@@ -1,0 +1,289 @@
+{
+  "honda/activa-6g": [
+    "/vehicles/honda/activa-6g/hero.jpg",
+    "/vehicles/honda/activa-6g/angle-front-quarter.jpg",
+    "/vehicles/honda/activa-6g/angle-side.jpg",
+    "/vehicles/honda/activa-6g/angle-rear.jpg",
+    "/vehicles/honda/activa-6g/angle-cockpit.jpg"
+  ],
+  "honda/activa-125": [
+    "/vehicles/honda/activa-125/hero.jpg",
+    "/vehicles/honda/activa-125/angle-front-quarter.jpg",
+    "/vehicles/honda/activa-125/angle-side.jpg",
+    "/vehicles/honda/activa-125/angle-rear.jpg",
+    "/vehicles/honda/activa-125/angle-cockpit.jpg"
+  ],
+  "suzuki/access-125": [
+    "/vehicles/suzuki/access-125/hero.jpg",
+    "/vehicles/suzuki/access-125/angle-front-quarter.jpg",
+    "/vehicles/suzuki/access-125/angle-side.jpg",
+    "/vehicles/suzuki/access-125/angle-rear.jpg",
+    "/vehicles/suzuki/access-125/angle-cockpit.jpg"
+  ],
+  "tvs/jupiter-125": [
+    "/vehicles/tvs/jupiter-125/hero.jpg",
+    "/vehicles/tvs/jupiter-125/angle-front-quarter.jpg",
+    "/vehicles/tvs/jupiter-125/angle-side.jpg",
+    "/vehicles/tvs/jupiter-125/angle-rear.jpg",
+    "/vehicles/tvs/jupiter-125/angle-cockpit.jpg"
+  ],
+  "tvs/ntorq-125": [
+    "/vehicles/tvs/ntorq-125/hero.jpg",
+    "/vehicles/tvs/ntorq-125/angle-front-quarter.jpg",
+    "/vehicles/tvs/ntorq-125/angle-side.jpg",
+    "/vehicles/tvs/ntorq-125/angle-rear.jpg",
+    "/vehicles/tvs/ntorq-125/angle-cockpit.jpg"
+  ],
+  "hero/splendor-plus": [
+    "/vehicles/hero/splendor-plus/hero.jpg",
+    "/vehicles/hero/splendor-plus/angle-front-quarter.jpg",
+    "/vehicles/hero/splendor-plus/angle-side.jpg",
+    "/vehicles/hero/splendor-plus/angle-rear.jpg",
+    "/vehicles/hero/splendor-plus/angle-cockpit.jpg"
+  ],
+  "hero/hf-deluxe": [
+    "/vehicles/hero/hf-deluxe/hero.jpg",
+    "/vehicles/hero/hf-deluxe/angle-front-quarter.jpg",
+    "/vehicles/hero/hf-deluxe/angle-side.jpg",
+    "/vehicles/hero/hf-deluxe/angle-rear.jpg",
+    "/vehicles/hero/hf-deluxe/angle-cockpit.jpg"
+  ],
+  "honda/shine": [
+    "/vehicles/honda/shine/hero.jpg",
+    "/vehicles/honda/shine/angle-front-quarter.jpg",
+    "/vehicles/honda/shine/angle-side.jpg",
+    "/vehicles/honda/shine/angle-rear.jpg",
+    "/vehicles/honda/shine/angle-cockpit.jpg"
+  ],
+  "bajaj/pulsar-125": [
+    "/vehicles/bajaj/pulsar-125/hero.jpg",
+    "/vehicles/bajaj/pulsar-125/angle-front-quarter.jpg",
+    "/vehicles/bajaj/pulsar-125/angle-side.jpg",
+    "/vehicles/bajaj/pulsar-125/angle-rear.jpg",
+    "/vehicles/bajaj/pulsar-125/angle-cockpit.jpg"
+  ],
+  "bajaj/pulsar-150": [
+    "/vehicles/bajaj/pulsar-150/hero.jpg",
+    "/vehicles/bajaj/pulsar-150/angle-front-quarter.jpg",
+    "/vehicles/bajaj/pulsar-150/angle-side.jpg",
+    "/vehicles/bajaj/pulsar-150/angle-rear.jpg",
+    "/vehicles/bajaj/pulsar-150/angle-cockpit.jpg"
+  ],
+  "yamaha/fz-fi": [
+    "/vehicles/yamaha/fz-fi/hero.jpg",
+    "/vehicles/yamaha/fz-fi/angle-front-quarter.jpg",
+    "/vehicles/yamaha/fz-fi/angle-side.jpg",
+    "/vehicles/yamaha/fz-fi/angle-rear.jpg",
+    "/vehicles/yamaha/fz-fi/angle-cockpit.jpg"
+  ],
+  "royal-enfield/classic-350": [
+    "/vehicles/royal-enfield/classic-350/hero.jpg",
+    "/vehicles/royal-enfield/classic-350/angle-front-quarter.jpg",
+    "/vehicles/royal-enfield/classic-350/angle-side.jpg",
+    "/vehicles/royal-enfield/classic-350/angle-rear.jpg",
+    "/vehicles/royal-enfield/classic-350/angle-cockpit.jpg"
+  ],
+  "royal-enfield/hunter-350": [
+    "/vehicles/royal-enfield/hunter-350/hero.jpg",
+    "/vehicles/royal-enfield/hunter-350/angle-front-quarter.jpg",
+    "/vehicles/royal-enfield/hunter-350/angle-side.jpg",
+    "/vehicles/royal-enfield/hunter-350/angle-rear.jpg",
+    "/vehicles/royal-enfield/hunter-350/angle-cockpit.jpg"
+  ],
+  "royal-enfield/bullet-350": [
+    "/vehicles/royal-enfield/bullet-350/hero.jpg",
+    "/vehicles/royal-enfield/bullet-350/angle-front-quarter.jpg",
+    "/vehicles/royal-enfield/bullet-350/angle-side.jpg",
+    "/vehicles/royal-enfield/bullet-350/angle-rear.jpg",
+    "/vehicles/royal-enfield/bullet-350/angle-cockpit.jpg"
+  ],
+  "royal-enfield/meteor-350": [
+    "/vehicles/royal-enfield/meteor-350/hero.jpg",
+    "/vehicles/royal-enfield/meteor-350/angle-front-quarter.jpg",
+    "/vehicles/royal-enfield/meteor-350/angle-side.jpg",
+    "/vehicles/royal-enfield/meteor-350/angle-rear.jpg",
+    "/vehicles/royal-enfield/meteor-350/angle-cockpit.jpg"
+  ],
+  "royal-enfield/scram-411": [
+    "/vehicles/royal-enfield/scram-411/hero.jpg",
+    "/vehicles/royal-enfield/scram-411/angle-front-quarter.jpg",
+    "/vehicles/royal-enfield/scram-411/angle-side.jpg",
+    "/vehicles/royal-enfield/scram-411/angle-rear.jpg",
+    "/vehicles/royal-enfield/scram-411/angle-cockpit.jpg"
+  ],
+  "bajaj/avenger-220": [
+    "/vehicles/bajaj/avenger-220/hero.jpg",
+    "/vehicles/bajaj/avenger-220/angle-front-quarter.jpg",
+    "/vehicles/bajaj/avenger-220/angle-side.jpg",
+    "/vehicles/bajaj/avenger-220/angle-rear.jpg",
+    "/vehicles/bajaj/avenger-220/angle-cockpit.jpg"
+  ],
+  "bajaj/dominar-400": [
+    "/vehicles/bajaj/dominar-400/hero.jpg",
+    "/vehicles/bajaj/dominar-400/angle-front-quarter.jpg",
+    "/vehicles/bajaj/dominar-400/angle-side.jpg",
+    "/vehicles/bajaj/dominar-400/angle-rear.jpg",
+    "/vehicles/bajaj/dominar-400/angle-cockpit.jpg"
+  ],
+  "yamaha/r15-v4": [
+    "/vehicles/yamaha/r15-v4/hero.jpg",
+    "/vehicles/yamaha/r15-v4/angle-front-quarter.jpg",
+    "/vehicles/yamaha/r15-v4/angle-side.jpg",
+    "/vehicles/yamaha/r15-v4/angle-rear.jpg",
+    "/vehicles/yamaha/r15-v4/angle-cockpit.jpg"
+  ],
+  "yamaha/mt-15": [
+    "/vehicles/yamaha/mt-15/hero.jpg",
+    "/vehicles/yamaha/mt-15/angle-front-quarter.jpg",
+    "/vehicles/yamaha/mt-15/angle-side.jpg",
+    "/vehicles/yamaha/mt-15/angle-rear.jpg",
+    "/vehicles/yamaha/mt-15/angle-cockpit.jpg"
+  ],
+  "ktm/duke-250": [
+    "/vehicles/ktm/duke-250/hero.jpg",
+    "/vehicles/ktm/duke-250/angle-front-quarter.jpg",
+    "/vehicles/ktm/duke-250/angle-side.jpg",
+    "/vehicles/ktm/duke-250/angle-rear.jpg",
+    "/vehicles/ktm/duke-250/angle-cockpit.jpg"
+  ],
+  "ktm/duke-390": [
+    "/vehicles/ktm/duke-390/hero.jpg",
+    "/vehicles/ktm/duke-390/angle-front-quarter.jpg",
+    "/vehicles/ktm/duke-390/angle-side.jpg",
+    "/vehicles/ktm/duke-390/angle-rear.jpg",
+    "/vehicles/ktm/duke-390/angle-cockpit.jpg"
+  ],
+  "ktm/rc-390": [
+    "/vehicles/ktm/rc-390/hero.jpg",
+    "/vehicles/ktm/rc-390/angle-front-quarter.jpg",
+    "/vehicles/ktm/rc-390/angle-side.jpg",
+    "/vehicles/ktm/rc-390/angle-rear.jpg",
+    "/vehicles/ktm/rc-390/angle-cockpit.jpg"
+  ],
+  "royal-enfield/himalayan-450": [
+    "/vehicles/royal-enfield/himalayan-450/hero.jpg",
+    "/vehicles/royal-enfield/himalayan-450/angle-front-quarter.jpg",
+    "/vehicles/royal-enfield/himalayan-450/angle-side.jpg",
+    "/vehicles/royal-enfield/himalayan-450/angle-rear.jpg",
+    "/vehicles/royal-enfield/himalayan-450/angle-cockpit.jpg"
+  ],
+  "royal-enfield/guerrilla-450": [
+    "/vehicles/royal-enfield/guerrilla-450/hero.jpg",
+    "/vehicles/royal-enfield/guerrilla-450/angle-front-quarter.jpg",
+    "/vehicles/royal-enfield/guerrilla-450/angle-side.jpg",
+    "/vehicles/royal-enfield/guerrilla-450/angle-rear.jpg",
+    "/vehicles/royal-enfield/guerrilla-450/angle-cockpit.jpg"
+  ],
+  "maruti/swift": [
+    "/vehicles/maruti/swift/hero.jpg",
+    "/vehicles/maruti/swift/angle-front-quarter.jpg",
+    "/vehicles/maruti/swift/angle-side.jpg",
+    "/vehicles/maruti/swift/angle-rear.jpg",
+    "/vehicles/maruti/swift/angle-cockpit.jpg"
+  ],
+  "maruti/baleno": [
+    "/vehicles/maruti/baleno/hero.jpg",
+    "/vehicles/maruti/baleno/angle-front-quarter.jpg",
+    "/vehicles/maruti/baleno/angle-side.jpg",
+    "/vehicles/maruti/baleno/angle-rear.jpg",
+    "/vehicles/maruti/baleno/angle-cockpit.jpg"
+  ],
+  "maruti/dzire": [
+    "/vehicles/maruti/dzire/hero.jpg",
+    "/vehicles/maruti/dzire/angle-front-quarter.jpg",
+    "/vehicles/maruti/dzire/angle-side.jpg",
+    "/vehicles/maruti/dzire/angle-rear.jpg",
+    "/vehicles/maruti/dzire/angle-cockpit.jpg"
+  ],
+  "maruti/fronx": [
+    "/vehicles/maruti/fronx/hero.jpg",
+    "/vehicles/maruti/fronx/angle-front-quarter.jpg",
+    "/vehicles/maruti/fronx/angle-side.jpg",
+    "/vehicles/maruti/fronx/angle-rear.jpg",
+    "/vehicles/maruti/fronx/angle-cockpit.jpg"
+  ],
+  "maruti/brezza": [
+    "/vehicles/maruti/brezza/hero.jpg",
+    "/vehicles/maruti/brezza/angle-front-quarter.jpg",
+    "/vehicles/maruti/brezza/angle-side.jpg",
+    "/vehicles/maruti/brezza/angle-rear.jpg",
+    "/vehicles/maruti/brezza/angle-cockpit.jpg"
+  ],
+  "kia/sonet": [
+    "/vehicles/kia/sonet/hero.jpg",
+    "/vehicles/kia/sonet/angle-front-quarter.jpg",
+    "/vehicles/kia/sonet/angle-side.jpg",
+    "/vehicles/kia/sonet/angle-rear.jpg",
+    "/vehicles/kia/sonet/angle-cockpit.jpg"
+  ],
+  "hyundai/venue": [
+    "/vehicles/hyundai/venue/hero.jpg",
+    "/vehicles/hyundai/venue/angle-front-quarter.jpg",
+    "/vehicles/hyundai/venue/angle-side.jpg",
+    "/vehicles/hyundai/venue/angle-rear.jpg",
+    "/vehicles/hyundai/venue/angle-cockpit.jpg"
+  ],
+  "maruti/ciaz": [
+    "/vehicles/maruti/ciaz/hero.jpg",
+    "/vehicles/maruti/ciaz/angle-front-quarter.jpg",
+    "/vehicles/maruti/ciaz/angle-side.jpg",
+    "/vehicles/maruti/ciaz/angle-rear.jpg",
+    "/vehicles/maruti/ciaz/angle-cockpit.jpg"
+  ],
+  "hyundai/verna": [
+    "/vehicles/hyundai/verna/hero.jpg",
+    "/vehicles/hyundai/verna/angle-front-quarter.jpg",
+    "/vehicles/hyundai/verna/angle-side.jpg",
+    "/vehicles/hyundai/verna/angle-rear.jpg",
+    "/vehicles/hyundai/verna/angle-cockpit.jpg"
+  ],
+  "maruti/ertiga": [
+    "/vehicles/maruti/ertiga/hero.jpg",
+    "/vehicles/maruti/ertiga/angle-front-quarter.jpg",
+    "/vehicles/maruti/ertiga/angle-side.jpg",
+    "/vehicles/maruti/ertiga/angle-rear.jpg",
+    "/vehicles/maruti/ertiga/angle-cockpit.jpg"
+  ],
+  "maruti/xl6": [
+    "/vehicles/maruti/xl6/hero.jpg",
+    "/vehicles/maruti/xl6/angle-front-quarter.jpg",
+    "/vehicles/maruti/xl6/angle-side.jpg",
+    "/vehicles/maruti/xl6/angle-rear.jpg",
+    "/vehicles/maruti/xl6/angle-cockpit.jpg"
+  ],
+  "toyota/innova-crysta": [
+    "/vehicles/toyota/innova-crysta/hero.jpg",
+    "/vehicles/toyota/innova-crysta/angle-front-quarter.jpg",
+    "/vehicles/toyota/innova-crysta/angle-side.jpg",
+    "/vehicles/toyota/innova-crysta/angle-rear.jpg",
+    "/vehicles/toyota/innova-crysta/angle-cockpit.jpg"
+  ],
+  "toyota/innova-hycross": [
+    "/vehicles/toyota/innova-hycross/hero.jpg",
+    "/vehicles/toyota/innova-hycross/angle-front-quarter.jpg",
+    "/vehicles/toyota/innova-hycross/angle-side.jpg",
+    "/vehicles/toyota/innova-hycross/angle-rear.jpg",
+    "/vehicles/toyota/innova-hycross/angle-cockpit.jpg"
+  ],
+  "mahindra/xuv700": [
+    "/vehicles/mahindra/xuv700/hero.jpg",
+    "/vehicles/mahindra/xuv700/angle-front-quarter.jpg",
+    "/vehicles/mahindra/xuv700/angle-side.jpg",
+    "/vehicles/mahindra/xuv700/angle-rear.jpg",
+    "/vehicles/mahindra/xuv700/angle-cockpit.jpg"
+  ],
+  "toyota/fortuner": [
+    "/vehicles/toyota/fortuner/hero.jpg",
+    "/vehicles/toyota/fortuner/angle-front-quarter.jpg",
+    "/vehicles/toyota/fortuner/angle-side.jpg",
+    "/vehicles/toyota/fortuner/angle-rear.jpg",
+    "/vehicles/toyota/fortuner/angle-cockpit.jpg"
+  ],
+  "audi/a6": [
+    "/vehicles/audi/a6/hero.jpg",
+    "/vehicles/audi/a6/angle-front-quarter.jpg",
+    "/vehicles/audi/a6/angle-side.jpg",
+    "/vehicles/audi/a6/angle-rear.jpg",
+    "/vehicles/audi/a6/angle-cockpit.jpg"
+  ]
+}

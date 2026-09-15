@@ -1,0 +1,369 @@
+[
+  {
+    "key": "honda/activa-6g",
+    "name": "Honda Activa 6G",
+    "page": "https://www.bikedekho.com/honda/activa-6g",
+    "source": "BikeDekho",
+    "hero_path": "/vehicles/honda/activa-6g/hero.jpg",
+    "file_size": 25928
+  },
+  {
+    "key": "honda/activa-125",
+    "name": "Honda Activa 125",
+    "page": "https://www.bikedekho.com/honda/activa-125",
+    "source": "BikeDekho",
+    "image_url": "https://cdn.bikedekho.com/processedimages/honda/2025-activa-125/source/2025-activa-12569f8637981339.jpg",
+    "hero_path": "/vehicles/honda/activa-125/hero.jpg",
+    "file_size": 58096
+  },
+  {
+    "key": "suzuki/access-125",
+    "name": "Suzuki Access 125",
+    "page": "https://www.bikedekho.com/suzuki/access-125",
+    "source": "BikeDekho",
+    "image_url": "https://cdn.bikedekho.com/processedimages/suzuki/2025-access-125/source/2025-access-12568a80430441e1.jpg",
+    "hero_path": "/vehicles/suzuki/access-125/hero.jpg",
+    "file_size": 56021
+  },
+  {
+    "key": "tvs/jupiter-125",
+    "name": "TVS Jupiter 125",
+    "page": "https://www.bikedekho.com/tvs/jupiter-125",
+    "source": "BikeDekho",
+    "image_url": "https://cdn.bikedekho.com/processedimages/tvs/jupiter-125/source/jupiter-12569fb243103684.jpg",
+    "hero_path": "/vehicles/tvs/jupiter-125/hero.jpg",
+    "file_size": 48132
+  },
+  {
+    "key": "tvs/ntorq-125",
+    "name": "TVS Ntorq 125",
+    "page": "https://www.bikedekho.com/tvs/ntorq-125",
+    "source": "BikeDekho",
+    "image_url": "https://cdn.bikedekho.com/processedimages/tvs/ntorq-125/source/ntorq-1256a3e458edb293.jpg",
+    "hero_path": "/vehicles/tvs/ntorq-125/hero.jpg",
+    "file_size": 51535
+  },
+  {
+    "key": "hero/splendor-plus",
+    "name": "Hero Splendor Plus",
+    "page": "https://www.bikedekho.com/hero/splendor-plus",
+    "source": "BikeDekho",
+    "image_url": "https://cdn.bikedekho.com/processedimages/hero-motocorp/hero-motocorp-splendor/source/hero-motocorp-splendor69ba806bcfb9f.jpg",
+    "hero_path": "/vehicles/hero/splendor-plus/hero.jpg",
+    "file_size": 64416
+  },
+  {
+    "key": "hero/hf-deluxe",
+    "name": "Hero HF Deluxe",
+    "page": "https://www.bikedekho.com/hero/hf-deluxe",
+    "source": "BikeDekho",
+    "image_url": "https://cdn.bikedekho.com/processedimages/hero/hf-delux-bs6/source/hf-delux-bs669c378fb4f7b6.jpg",
+    "hero_path": "/vehicles/hero/hf-deluxe/hero.jpg",
+    "file_size": 72582
+  },
+  {
+    "key": "honda/shine",
+    "name": "Honda Shine 125",
+    "page": "https://www.bikedekho.com/honda/shine",
+    "source": "BikeDekho",
+    "image_url": "https://cdn.bikedekho.com/processedimages/honda/shine-bs6/source/shine-bs669c5026641b53.jpg",
+    "hero_path": "/vehicles/honda/shine/hero.jpg",
+    "file_size": 75298
+  },
+  {
+    "key": "bajaj/pulsar-125",
+    "name": "Bajaj Pulsar 125",
+    "page": "https://www.bikedekho.com/bajaj/pulsar-125",
+    "source": "BikeDekho",
+    "image_url": "https://cdn.bikedekho.com/processedimages/bajaj/2026-pulsar-125/source/2026-pulsar-1256a8d3e4d8f6b2.jpg",
+    "hero_path": "/vehicles/bajaj/pulsar-125/hero.jpg",
+    "file_size": 66112
+  },
+  {
+    "key": "bajaj/pulsar-150",
+    "name": "Bajaj Pulsar 150",
+    "page": "https://www.bikedekho.com/bajaj/pulsar-150",
+    "source": "BikeDekho",
+    "image_url": "https://cdn.bikedekho.com/processedimages/bajaj/2026-pulsar-150/source/2026-pulsar-1506a8c15eb77be9.jpg",
+    "hero_path": "/vehicles/bajaj/pulsar-150/hero.jpg",
+    "file_size": 69308
+  },
+  {
+    "key": "yamaha/fz-fi",
+    "name": "Yamaha FZ-S FI V4",
+    "page": "https://www.bikedekho.com/yamaha/fzs-fi-v4",
+    "source": "BikeDekho",
+    "image_url": "https://cdn.bikedekho.com/processedimages/yamaha/fzs-fi-v4/source/fzs-fi-v46a10458db8a6c.jpg",
+    "hero_path": "/vehicles/yamaha/fz-fi/hero.jpg",
+    "file_size": 74376
+  },
+  {
+    "key": "royal-enfield/classic-350",
+    "name": "Royal Enfield Classic 350",
+    "page": "https://www.bikedekho.com/royal-enfield/classic-350",
+    "source": "BikeDekho",
+    "image_url": "https://cdn.bikedekho.com/processedimages/royal-enfield/classic350/source/classic35068b6db31f3948.jpg",
+    "hero_path": "/vehicles/royal-enfield/classic-350/hero.jpg",
+    "file_size": 85577
+  },
+  {
+    "key": "royal-enfield/hunter-350",
+    "name": "Royal Enfield Hunter 350",
+    "page": "https://www.bikedekho.com/royal-enfield/hunter-350",
+    "source": "BikeDekho",
+    "image_url": "https://cdn.bikedekho.com/processedimages/royal-enfield/himalayan-440/source/himalayan-4406a9fe2f120aed.jpg",
+    "hero_path": "/vehicles/royal-enfield/hunter-350/hero.jpg",
+    "file_size": 76710
+  },
+  {
+    "key": "royal-enfield/bullet-350",
+    "name": "Royal Enfield Bullet 350",
+    "page": "https://www.bikedekho.com/royal-enfield/bullet-350",
+    "source": "BikeDekho",
+    "image_url": "https://cdn.bikedekho.com/processedimages/royal-enfield/2021-bullet-350/source/2021-bullet-35068a70ff776218.jpg",
+    "hero_path": "/vehicles/royal-enfield/bullet-350/hero.jpg",
+    "file_size": 89587
+  },
+  {
+    "key": "royal-enfield/meteor-350",
+    "name": "Royal Enfield Meteor 350",
+    "page": "https://www.bikedekho.com/royal-enfield/meteor-350",
+    "source": "BikeDekho",
+    "image_url": "https://cdn.bikedekho.com/processedimages/royal-enfield/meteor-350/source/meteor-35068e792df91c55.jpg",
+    "hero_path": "/vehicles/royal-enfield/meteor-350/hero.jpg",
+    "file_size": 84572
+  },
+  {
+    "key": "royal-enfield/scram-411",
+    "name": "Royal Enfield Scram 411",
+    "page": "https://www.bikedekho.com/royal-enfield/scram-411",
+    "source": "BikeDekho",
+    "image_url": "https://cdn.bikedekho.com/processedimages/royal-enfield/scram/640X309/scram62381d1eb7d11.jpg",
+    "hero_path": "/vehicles/royal-enfield/scram-411/hero.jpg",
+    "file_size": 52849
+  },
+  {
+    "key": "bajaj/avenger-220",
+    "name": "Bajaj Avenger Cruise 220",
+    "page": "https://www.bikedekho.com/bajaj/avenger-cruise-220",
+    "source": "BikeDekho",
+    "image_url": "https://cdn.bikedekho.com/processedimages/bajaj/bajaj-avenger-cruise/source/bajaj-avenger-cruise68d231f1733f1.jpg",
+    "hero_path": "/vehicles/bajaj/avenger-220/hero.jpg",
+    "file_size": 73279
+  },
+  {
+    "key": "bajaj/dominar-400",
+    "name": "Bajaj Dominar 400",
+    "page": "https://www.bikedekho.com/bajaj/dominar-400",
+    "source": "BikeDekho",
+    "image_url": "https://cdn.bikedekho.com/processedimages/bajaj/dominar-350/source/dominar-35069dccc8d259a4.jpg",
+    "hero_path": "/vehicles/bajaj/dominar-400/hero.jpg",
+    "file_size": 86551
+  },
+  {
+    "key": "yamaha/r15-v4",
+    "name": "Yamaha YZF-R15 V4",
+    "page": "https://www.bikedekho.com/yamaha/yzf-r15-v4",
+    "source": "BikeDekho",
+    "image_url": "https://cdn.bikedekho.com/processedimages/yamaha/r15-v4/source/r15-v468bbb605ad77f.jpg",
+    "hero_path": "/vehicles/yamaha/r15-v4/hero.jpg",
+    "file_size": 99113
+  },
+  {
+    "key": "yamaha/mt-15",
+    "name": "Yamaha MT-15 V2",
+    "page": "https://www.bikedekho.com/yamaha/mt-15",
+    "source": "BikeDekho",
+    "image_url": "https://cdn.bikedekho.com/processedimages/yamaha/mt-15-2-0/source/mt-15-2-06613f885e681c.jpg",
+    "hero_path": "/vehicles/yamaha/mt-15/hero.jpg",
+    "file_size": 112173
+  },
+  {
+    "key": "ktm/duke-250",
+    "name": "KTM 250 Duke",
+    "page": "https://www.bikedekho.com/ktm/250-duke",
+    "source": "BikeDekho",
+    "image_url": "https://cdn.bikedekho.com/processedimages/ktm/350-duke/source/350-duke6a1682e68c84c.jpg",
+    "hero_path": "/vehicles/ktm/duke-250/hero.jpg",
+    "file_size": 81823
+  },
+  {
+    "key": "ktm/duke-390",
+    "name": "KTM 390 Duke",
+    "page": "https://www.bikedekho.com/ktm/390-duke",
+    "source": "BikeDekho",
+    "image_url": "https://cdn.bikedekho.com/processedimages/ktm/350-duke/source/350-duke6a1682e68c84c.jpg",
+    "hero_path": "/vehicles/ktm/duke-390/hero.jpg",
+    "file_size": 81823
+  },
+  {
+    "key": "ktm/rc-390",
+    "name": "KTM RC 390",
+    "page": "https://www.bikedekho.com/ktm/rc-390",
+    "source": "BikeDekho",
+    "image_url": "https://cdn.bikedekho.com/processedimages/ktm/2021-rc-390/source/2021-rc-39068ce56b5dffad.jpg",
+    "hero_path": "/vehicles/ktm/rc-390/hero.jpg",
+    "file_size": 78615
+  },
+  {
+    "key": "royal-enfield/himalayan-450",
+    "name": "Royal Enfield Himalayan 450",
+    "page": "https://www.bikedekho.com/royal-enfield/himalayan-450",
+    "source": "BikeDekho",
+    "image_url": "https://cdn.bikedekho.com/processedimages/royal-enfield/himalayan-450/source/himalayan-45069cba72ab286c.jpg",
+    "hero_path": "/vehicles/royal-enfield/himalayan-450/hero.jpg",
+    "file_size": 75957
+  },
+  {
+    "key": "royal-enfield/guerrilla-450",
+    "name": "Royal Enfield Guerrilla 450",
+    "page": "https://www.bikedekho.com/royal-enfield/guerrilla-450",
+    "source": "BikeDekho",
+    "image_url": "https://cdn.bikedekho.com/processedimages/royal-enfield/scram-450/source/scram-45069ce30364c788.jpg",
+    "hero_path": "/vehicles/royal-enfield/guerrilla-450/hero.jpg",
+    "file_size": 79422
+  },
+  {
+    "key": "maruti/swift",
+    "name": "Maruti Suzuki Swift",
+    "page": "https://www.cardekho.com/maruti/swift",
+    "source": "CarDekho",
+    "hero_path": "/vehicles/maruti/swift/hero.jpg",
+    "file_size": 68432
+  },
+  {
+    "key": "maruti/baleno",
+    "name": "Maruti Suzuki Baleno",
+    "page": "https://www.cardekho.com/maruti/baleno",
+    "source": "CarDekho",
+    "image_url": "https://stimg.cardekho.com/images/carexteriorimages/630x420/Maruti/Baleno/12257/1788843598460/front-left-side-47.jpg",
+    "hero_path": "/vehicles/maruti/baleno/hero.jpg",
+    "file_size": 27787
+  },
+  {
+    "key": "maruti/dzire",
+    "name": "Maruti Suzuki Dzire",
+    "page": "https://www.cardekho.com/maruti/dzire",
+    "source": "CarDekho",
+    "image_url": "https://stimg.cardekho.com/images/carexteriorimages/630x420/Maruti/Dzire/12186/1771935643542/front-left-side-47.jpg",
+    "hero_path": "/vehicles/maruti/dzire/hero.jpg",
+    "file_size": 31096
+  },
+  {
+    "key": "maruti/fronx",
+    "name": "Maruti Suzuki Fronx",
+    "page": "https://www.cardekho.com/maruti/fronx",
+    "source": "CarDekho",
+    "image_url": "https://stimg.cardekho.com/images/carexteriorimages/630x420/Maruti/FRONX/9916/1771931850505/front-left-side-47.jpg",
+    "hero_path": "/vehicles/maruti/fronx/hero.jpg",
+    "file_size": 33926
+  },
+  {
+    "key": "maruti/brezza",
+    "name": "Maruti Suzuki Brezza",
+    "page": "https://www.cardekho.com/maruti/brezza",
+    "source": "CarDekho",
+    "image_url": "https://stimg.cardekho.com/images/carexteriorimages/630x420/Maruti/Brezza/13709/1785846873395/front-left-side-47.jpg",
+    "hero_path": "/vehicles/maruti/brezza/hero.jpg",
+    "file_size": 28755
+  },
+  {
+    "key": "kia/sonet",
+    "name": "Kia Sonet",
+    "page": "https://www.cardekho.com/kia/sonet",
+    "source": "CarDekho",
+    "image_url": "https://stimg.cardekho.com/images/carexteriorimages/630x420/Kia/Sonet/11411/1782132032079/front-left-side-47.jpg",
+    "hero_path": "/vehicles/kia/sonet/hero.jpg",
+    "file_size": 25758
+  },
+  {
+    "key": "hyundai/venue",
+    "name": "Hyundai Venue",
+    "page": "https://www.cardekho.com/hyundai/venue",
+    "source": "CarDekho",
+    "image_url": "https://stimg.cardekho.com/images/carexteriorimages/630x420/Hyundai/Venue/12999/1771931633886/front-left-side-47.jpg",
+    "hero_path": "/vehicles/hyundai/venue/hero.jpg",
+    "file_size": 29679
+  },
+  {
+    "key": "maruti/ciaz",
+    "name": "Maruti Suzuki Ciaz",
+    "page": "https://www.cardekho.com/maruti/ciaz",
+    "source": "CarDekho",
+    "image_url": "https://stimg.cardekho.com/images/carexteriorimages/630x420/Maruti/Ciaz/10340/1762857604189/front-left-side-47.jpg",
+    "hero_path": "/vehicles/maruti/ciaz/hero.jpg",
+    "file_size": 30570
+  },
+  {
+    "key": "hyundai/verna",
+    "name": "Hyundai Verna",
+    "page": "https://www.cardekho.com/hyundai/verna",
+    "source": "CarDekho",
+    "image_url": "https://stimg.cardekho.com/images/carexteriorimages/630x420/Hyundai/Verna-Facelift/13312/1773040519044/front-left-side-47.jpg",
+    "hero_path": "/vehicles/hyundai/verna/hero.jpg",
+    "file_size": 21665
+  },
+  {
+    "key": "maruti/ertiga",
+    "name": "Maruti Suzuki Ertiga",
+    "page": "https://www.cardekho.com/maruti/ertiga",
+    "source": "CarDekho",
+    "image_url": "https://stimg.cardekho.com/images/carexteriorimages/630x420/Maruti/Ertiga/10288/1755776579514/front-left-side-47.jpg",
+    "hero_path": "/vehicles/maruti/ertiga/hero.jpg",
+    "file_size": 34356
+  },
+  {
+    "key": "maruti/xl6",
+    "name": "Maruti Suzuki XL6",
+    "page": "https://www.cardekho.com/maruti/xl6",
+    "source": "CarDekho",
+    "image_url": "https://stimg.cardekho.com/images/carexteriorimages/630x420/Maruti/XL6/10378/1762863855359/front-left-side-47.jpg",
+    "hero_path": "/vehicles/maruti/xl6/hero.jpg",
+    "file_size": 32802
+  },
+  {
+    "key": "toyota/innova-crysta",
+    "name": "Toyota Innova Crysta",
+    "page": "https://www.cardekho.com/toyota/innova-crysta",
+    "source": "CarDekho",
+    "image_url": "https://stimg.cardekho.com/images/carexteriorimages/630x420/Toyota/Innova-Crysta/11703/1780562393141/front-left-side-47.jpg",
+    "hero_path": "/vehicles/toyota/innova-crysta/hero.jpg",
+    "file_size": 32692
+  },
+  {
+    "key": "toyota/innova-hycross",
+    "name": "Toyota Innova Hycross",
+    "page": "https://www.cardekho.com/toyota/innova-hycross",
+    "source": "CarDekho",
+    "image_url": "https://stimg.cardekho.com/images/carexteriorimages/630x420/Toyota/Innova-Hycross/12719/1776918655192/front-left-side-47.jpg",
+    "hero_path": "/vehicles/toyota/innova-hycross/hero.jpg",
+    "file_size": 30124
+  },
+  {
+    "key": "mahindra/xuv700",
+    "name": "Mahindra XUV700",
+    "page": "https://www.cardekho.com/mahindra/xuv700",
+    "source": "CarDekho",
+    "image_url": "https://stimg.cardekho.com/images/carexteriorimages/630x420/Mahindra/XUV700/10794/1762509966753/front-left-side-47.jpg",
+    "hero_path": "/vehicles/mahindra/xuv700/hero.jpg",
+    "file_size": 28268
+  },
+  {
+    "key": "toyota/fortuner",
+    "name": "Toyota Fortuner 4x4",
+    "page": "https://www.cardekho.com/toyota/fortuner",
+    "source": "CarDekho",
+    "image_url": "https://stimg.cardekho.com/images/carexteriorimages/630x420/Toyota/Fortuner/10904/1755846017683/front-left-side-47.jpg",
+    "hero_path": "/vehicles/toyota/fortuner/hero.jpg",
+    "file_size": 29453
+  },
+  {
+    "key": "audi/a6",
+    "name": "Audi A6",
+    "page": "https://www.cardekho.com/audi/a6",
+    "source": "CarDekho",
+    "image_url": "https://stimg.cardekho.com/images/carexteriorimages/630x420/Audi/A6/10551/1757140056684/front-left-side-47.jpg",
+    "hero_path": "/vehicles/audi/a6/hero.jpg",
+    "file_size": 25786
+  }
+]

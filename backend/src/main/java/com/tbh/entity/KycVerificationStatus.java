@@ -1,0 +1,17 @@
+package com.tbh.entity;
+
+public enum KycVerificationStatus {
+    NOT_STARTED,
+    NOT_SUBMITTED,
+    DOCUMENTS_UPLOADED,
+    PROCESSING,
+    CUSTOMER_CONFIRMATION_REQUIRED,
+    PENDING_ADMIN_REVIEW,
+    SUBMITTED,
+    MANUAL_REVIEW,
+    REUPLOAD_REQUIRED,
+    REJECTED,
+    EXPIRED,
+    VERIFIED,
+    TBH_VERIFIED
+}
