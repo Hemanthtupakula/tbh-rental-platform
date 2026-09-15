@@ -12,7 +12,7 @@ public class ImageKitConfig {
     @Value("${tbh.imagekit.public-key:public_NS0dUSt2SSRtcWhuLkyPHEKUjz0=}")
     private String publicKey;
 
-    @Value("${tbh.imagekit.private-key:private_4+QFj7YnGA5RXndCo3k5JW4zUDM=}")
+    @Value("${tbh.imagekit.private-key:}")
     private String privateKey;
 
     @Value("${tbh.imagekit.id:hemanthhkt}")

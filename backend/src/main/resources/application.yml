@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
 
 spring:
   application:
@@ -8,10 +8,10 @@ spring:
     active: dev
 
   datasource:
-    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:tbh}?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Kolkata
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:tbh}?createDatabaseIfNotExist=true&useSSL=${DB_USE_SSL:false}&allowPublicKeyRetrieval=${DB_ALLOW_PUBLIC_KEY_RETRIEVAL:true}&serverTimezone=Asia/Kolkata
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: ${DB_USER:root}
-    password: ${DB_PASSWORD:Sheshadri@1}
+    password: ${DB_PASSWORD:}
     hikari:
       maximum-pool-size: 10
       minimum-idle: 2
@@ -43,7 +43,7 @@ tbh:
   otp:
     provider: ${TBH_OTP_PROVIDER:sms}
   sms:
-    api-key: ${TBH_SMS_API_KEY:OcNLHayXvZE2Sq6C0MUYTI3dKl5e7iD8rVRuWojxtgwfmJ9znpNwU6eFzsAgPcoqJ5L0Ty1RjYQulZpC}
+    api-key: ${TBH_SMS_API_KEY:}
     sender-id: ${TBH_SMS_SENDER_ID:TBHIND}
     route: ${TBH_SMS_ROUTE:otp}
     dlt-template-id: ${TBH_SMS_DLT_TEMPLATE_ID:}
@@ -62,12 +62,12 @@ tbh:
   imagekit:
     endpoint: ${IMAGEKIT_URL_ENDPOINT:https://ik.imagekit.io/hemanthhkt}
     public-key: ${IMAGEKIT_PUBLIC_KEY:public_NS0dUSt2SSRtcWhuLkyPHEKUjz0=}
-    private-key: ${IMAGEKIT_PRIVATE_KEY:private_4+QFj7YnGA5RXndCo3k5JW4zUDM=}
+    private-key: ${IMAGEKIT_PRIVATE_KEY:}
     id: ${IMAGEKIT_ID:hemanthhkt}
   clerk:
     issuer: ${CLERK_ISSUER:https://deep-zebra-6151.clerk.accounts.dev}
     jwks-uri: ${CLERK_JWKS_URI:https://deep-zebra-6151.clerk.accounts.dev/.well-known/jwks.json}
-    secret-key: ${CLERK_SECRET_KEY:sk_test_E6CSavcSH2fkdo1j1QM0YzAvvj4LDIuN2hjWDgFenc}
+    secret-key: ${CLERK_SECRET_KEY:}
     publishable-key: ${CLERK_PUBLISHABLE_KEY:pk_test_ZGVlcC16ZWJyYS02MTUxLmNsZXJrLmFjY291bnRzLmRldiQ}
 
 ---

@@ -76,11 +76,11 @@ services:
       TBH_ALLOWED_ORIGINS: ${TBH_ALLOWED_ORIGINS:-http://localhost,http://localhost:80,http://localhost:3000,http://localhost:5173,http://127.0.0.1}
       IMAGEKIT_URL_ENDPOINT: ${IMAGEKIT_URL_ENDPOINT:-https://ik.imagekit.io/hemanthhkt}
       IMAGEKIT_PUBLIC_KEY: ${IMAGEKIT_PUBLIC_KEY:-public_NS0dUSt2SSRtcWhuLkyPHEKUjz0=}
-      IMAGEKIT_PRIVATE_KEY: ${IMAGEKIT_PRIVATE_KEY:-private_4+QFj7YnGA5RXndCo3k5JW4zUDM=}
+      IMAGEKIT_PRIVATE_KEY: ${IMAGEKIT_PRIVATE_KEY:-}
       IMAGEKIT_ID: ${IMAGEKIT_ID:-hemanthhkt}
       CLERK_ISSUER: ${CLERK_ISSUER:-https://deep-zebra-6151.clerk.accounts.dev}
       CLERK_JWKS_URI: ${CLERK_JWKS_URI:-https://deep-zebra-6151.clerk.accounts.dev/.well-known/jwks.json}
-      CLERK_SECRET_KEY: ${CLERK_SECRET_KEY:-sk_test_E6CSavcSH2fkdo1j1QM0YzAvvj4LDIuN2hjWDgFenc}
+      CLERK_SECRET_KEY: ${CLERK_SECRET_KEY:-}
       CLERK_PUBLISHABLE_KEY: ${CLERK_PUBLISHABLE_KEY:-pk_test_ZGVlcC16ZWJyYS02MTUxLmNsZXJrLmFjY291bnRzLmRldiQ}
       TESSERACT_CMD: ${TESSERACT_CMD:-/usr/bin/tesseract}
       RESEND_API_KEY: ${RESEND_API_KEY:-}

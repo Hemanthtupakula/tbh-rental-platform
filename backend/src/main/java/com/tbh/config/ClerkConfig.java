@@ -12,7 +12,7 @@ public class ClerkConfig {
     @Value("${tbh.clerk.jwks-uri:https://deep-zebra-6151.clerk.accounts.dev/.well-known/jwks.json}")
     private String jwksUri;
 
-    @Value("${tbh.clerk.secret-key:sk_test_E6CSavcSH2fkdo1j1QM0YzAvvj4LDIuN2hjWDgFenc}")
+    @Value("${tbh.clerk.secret-key:}")
     private String secretKey;
 
     @Value("${tbh.clerk.publishable-key:pk_test_ZGVlcC16ZWJyYS02MTUxLmNsZXJrLmFjY291bnRzLmRldiQ}")
