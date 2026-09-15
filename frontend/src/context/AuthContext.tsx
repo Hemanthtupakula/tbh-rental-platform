@@ -7,6 +7,10 @@ import { syncClerkUserWithBackend } from '../services/clerkAuth';
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
+  isClerkLoading: boolean;
+  isClerkSignedIn: boolean;
+  isTbhUserLoading: boolean;
+  tbhUserError: string | null;
   loginWithEmail: (email: string, pass: string) => Promise<boolean>;
   signupWithEmail: (name: string, email: string, phone: string, pass: string) => Promise<boolean>;
   sendOtp: (phone: string) => Promise<{ message: string; devOtp?: string }>;
@@ -28,11 +32,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return saved ? JSON.parse(saved) : null;
   });
 
+  const [isTbhUserLoading, setIsTbhUserLoading] = useState<boolean>(false);
+  const [tbhUserError, setTbhUserError] = useState<string | null>(null);
+  const syncInProgressRef = useRef<boolean>(false);
+
   const refreshTokenRef = useRef<string | null>(sessionStorage.getItem('tbh_refresh_token'));
 
   // Real Clerk React Authentication Integration
   const { isLoaded, isSignedIn, userId, getToken, signOut: clerkSignOut } = useClerkAuth();
   const { user: clerkUser } = useClerkUser();
+
+  const isClerkLoading = !isLoaded;
+  const isClerkSignedIn = Boolean(isLoaded && isSignedIn);
 
   // Persist user in session storage
   useEffect(() => {
@@ -44,46 +55,54 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [user]);
 
   // Synchronize Clerk session with TBH backend
-  useEffect(() => {
-    let isMounted = true;
+  const syncWithBackend = async () => {
+    if (!isLoaded) return;
 
-    const syncWithBackend = async () => {
-      if (isLoaded && isSignedIn && userId) {
-        try {
-          const token = await getToken();
-          if (token && isMounted) {
-            const syncedUser = await syncClerkUserWithBackend(token);
-            if (syncedUser && isMounted) {
-              if (clerkUser) {
-                const displayName = clerkUser.fullName || `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim();
-                if (displayName) syncedUser.fullName = displayName;
-                const email = clerkUser.primaryEmailAddress?.emailAddress;
-                if (email) syncedUser.email = email;
-                const phone = clerkUser.primaryPhoneNumber?.phoneNumber;
-                if (phone) syncedUser.phoneNumber = phone;
-              }
-              setUser(syncedUser);
+    if (isSignedIn && userId) {
+      if (syncInProgressRef.current) return;
+      syncInProgressRef.current = true;
+      setIsTbhUserLoading(true);
+      setTbhUserError(null);
+
+      try {
+        const token = await getToken();
+        if (token) {
+          const syncedUser = await syncClerkUserWithBackend(token);
+          if (syncedUser) {
+            if (clerkUser) {
+              const displayName = clerkUser.fullName || `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim();
+              if (displayName) syncedUser.fullName = displayName;
+              const email = clerkUser.primaryEmailAddress?.emailAddress;
+              if (email) syncedUser.email = email;
+              const phone = clerkUser.primaryPhoneNumber?.phoneNumber;
+              if (phone) syncedUser.phoneNumber = phone;
             }
+            setUser(syncedUser);
+            sessionStorage.setItem('tbh_user', JSON.stringify(syncedUser));
+          } else {
+            setTbhUserError("Unable to synchronize rider profile with server.");
           }
-        } catch (err) {
-          console.error('[CLERK AUTH] Failed to sync session with TBH backend:', err);
         }
-      } else if (isLoaded && !isSignedIn && user?.clerkUserId) {
-        if (isMounted) {
-          sessionStorage.removeItem('tbh_token');
-          sessionStorage.removeItem('tbh_user');
-          localStorage.removeItem('tbh_token');
-          setUser(null);
-        }
+      } catch (err: any) {
+        console.error('[CLERK AUTH] Failed to sync session with TBH backend:', err);
+        setTbhUserError(err?.message || "Profile synchronization error.");
+      } finally {
+        setIsTbhUserLoading(false);
+        syncInProgressRef.current = false;
       }
-    };
+    } else if (isLoaded && !isSignedIn) {
+      setUser(null);
+      setTbhUserError(null);
+      setIsTbhUserLoading(false);
+      sessionStorage.removeItem('tbh_token');
+      sessionStorage.removeItem('tbh_user');
+      localStorage.removeItem('tbh_token');
+    }
+  };
 
+  useEffect(() => {
     syncWithBackend();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [isLoaded, isSignedIn, userId, clerkUser]);
+  }, [isLoaded, isSignedIn, userId]);
 
   // Handle successful auth tokens
   const handleAuthSuccess = (data: any) => {
@@ -254,6 +273,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     sessionStorage.removeItem('tbh_user');
     localStorage.removeItem('tbh_token');
     setUser(null);
+    setTbhUserError(null);
+    setIsTbhUserLoading(false);
     try {
       await clerkSignOut();
     } catch (err) {
@@ -276,7 +297,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const token = await getToken();
         if (token) {
           const synced = await syncClerkUserWithBackend(token);
-          if (synced) setUser(synced);
+          if (synced) {
+            setUser(synced);
+            sessionStorage.setItem('tbh_user', JSON.stringify(synced));
+          }
         }
       } catch (err) {
         console.warn('[AUTH] Error refreshing user:', err);
@@ -284,12 +308,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const isAuthenticated = isLoaded ? (isSignedIn || (!!user && !user.clerkUserId)) : !!user;
+  const isAuthenticated = isClerkSignedIn ? Boolean(user) : (isLoaded ? Boolean(user && !user.clerkUserId) : Boolean(user));
 
   return (
     <AuthContext.Provider value={{
       user,
       isAuthenticated,
+      isClerkLoading,
+      isClerkSignedIn,
+      isTbhUserLoading,
+      tbhUserError,
       loginWithEmail,
       signupWithEmail,
       sendOtp,
