@@ -43,12 +43,12 @@ public class HealthController {
         if (dbHealthy) {
             response.put("status", "UP");
             response.put("database", "UP");
-            response.put("version", "1.0.0-eee0bb6");
+            response.put("version", "1.0.0-ecb4a6a");
             return ResponseEntity.ok(response);
         } else {
             response.put("status", "DOWN");
             response.put("database", "DOWN");
-            response.put("version", "1.0.0-eee0bb6");
+            response.put("version", "1.0.0-ecb4a6a");
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
         }
     }
