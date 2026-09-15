@@ -3,17 +3,15 @@ import {
   X, 
   ShieldCheck, 
   CheckCircle2, 
-  UploadCloud, 
-  Lock,
-  UserCheck
+  UploadCloud 
 } from 'lucide-react';
-import { SignIn, SignUp } from '@clerk/clerk-react';
+import { SignIn, SignUp, useAuth as useClerkAuth } from '@clerk/clerk-react';
 import { useAuth } from '../context/AuthContext';
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
-  initialTab?: 'SIGN_IN' | 'SIGN_UP';
+  initialTab?: 'SIGN_IN' | 'SIGN_UP' | 'LICENSE';
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({ 
@@ -22,6 +20,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   initialTab = 'SIGN_IN' 
 }) => {
   const { user, isAuthenticated, verifyLicense } = useAuth();
+  const { isSignedIn } = useClerkAuth();
 
   const [activeTab, setActiveTab] = useState<'SIGN_IN' | 'SIGN_UP' | 'LICENSE'>('SIGN_IN');
   const [licenseNumber, setLicenseNumber] = useState<string>(user?.drivingLicenseNumber || '');
@@ -33,13 +32,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     if (isOpen) {
       setErrorMessage('');
       setLicenseSuccess(false);
-      if (isAuthenticated) {
-        setActiveTab('LICENSE');
-      } else {
-        setActiveTab(initialTab);
-      }
+      setActiveTab(initialTab);
     }
-  }, [isOpen, isAuthenticated, initialTab]);
+  }, [isOpen, initialTab]);
+
+  // Automatically close modal when Clerk authentication succeeds during sign in or sign up
+  useEffect(() => {
+    if (isOpen && isSignedIn && (activeTab === 'SIGN_IN' || activeTab === 'SIGN_UP')) {
+      const timer = setTimeout(() => {
+        onClose();
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, isSignedIn, activeTab, onClose]);
 
   if (!isOpen) return null;
 
@@ -110,14 +115,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </div>
             <div>
               <h3 id="auth-modal-title" className="font-extrabold font-display text-base text-white">
-                {isAuthenticated ? 'Rider Licence & KYC' : 'Rider Authentication'}
+                {activeTab === 'LICENSE' ? 'Driving Licence KYC' : 'Rider Authentication'}
               </h3>
               <p className="text-[11px] text-slate-400">
-                {isAuthenticated ? 'Motor Vehicles Act Identity Compliance' : 'Secure Sign In & Account Creation'}
+                {activeTab === 'LICENSE' ? 'Motor Vehicles Act Identity Compliance' : 'Clerk Verified Account Sign In & Creation'}
               </p>
             </div>
           </div>
           <button 
+            type="button"
             onClick={onClose}
             aria-label="Close authentication modal"
             className="p-2 rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-white transition"
@@ -126,10 +132,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </button>
         </div>
 
-        {/* Tab Switcher (Only when unauthenticated) */}
-        {!isAuthenticated && (
+        {/* Tab Switcher */}
+        {activeTab !== 'LICENSE' && (
           <div className="grid grid-cols-2 gap-1 p-2 bg-[#0A0A0B] border-b border-white/10">
             <button
+              type="button"
               onClick={() => { setActiveTab('SIGN_IN'); setErrorMessage(''); }}
               className={`py-2 text-xs font-bold rounded-lg transition ${
                 activeTab === 'SIGN_IN' 
@@ -140,6 +147,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               Sign In
             </button>
             <button
+              type="button"
               onClick={() => { setActiveTab('SIGN_UP'); setErrorMessage(''); }}
               className={`py-2 text-xs font-bold rounded-lg transition ${
                 activeTab === 'SIGN_UP' 
@@ -160,40 +168,42 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </div>
           )}
 
-          {/* Unauthenticated: Clerk Sign In */}
-          {!isAuthenticated && activeTab === 'SIGN_IN' && (
-            <div className="clerk-auth-container">
+          {/* Clerk Sign In */}
+          {activeTab === 'SIGN_IN' && (
+            <div className="clerk-auth-container w-full">
               <SignIn 
+                key="tbh-clerk-sign-in"
                 routing="virtual"
                 appearance={clerkAppearance}
               />
             </div>
           )}
 
-          {/* Unauthenticated: Clerk Sign Up */}
-          {!isAuthenticated && activeTab === 'SIGN_UP' && (
-            <div className="clerk-auth-container">
+          {/* Clerk Sign Up */}
+          {activeTab === 'SIGN_UP' && (
+            <div className="clerk-auth-container w-full">
               <SignUp 
+                key="tbh-clerk-sign-up"
                 routing="virtual"
                 appearance={clerkAppearance}
               />
             </div>
           )}
 
-          {/* Authenticated: Driving Licence & KYC Verification */}
-          {isAuthenticated && (
+          {/* Driving Licence & KYC Verification */}
+          {activeTab === 'LICENSE' && (
             <form onSubmit={handleVerifyLicenseSubmit} className="space-y-4">
               <div className="p-3.5 rounded-2xl bg-[#0A0A0B] border border-[#00E5C7]/30 flex items-center space-x-3">
                 <ShieldCheck className="w-7 h-7 text-[#00E5C7]" />
                 <div>
-                  <h4 className="text-xs font-bold text-white">Driving License & DigiLocker KYC</h4>
-                  <p className="text-[10px] text-slate-400">Required by Indian Motor Vehicles Act for self-drive rentals</p>
+                  <h4 className="text-xs font-bold text-white">Driving Licence KYC</h4>
+                  <p className="text-[10px] text-slate-400">Required by Motor Vehicles Act for self-drive rentals</p>
                 </div>
               </div>
 
               <div>
                 <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
-                  Driving License Number (DL)
+                  Driving Licence Number (DL)
                 </label>
                 <input
                   type="text"
@@ -207,14 +217,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
               <div className="p-4 rounded-xl border-2 border-dashed border-white/15 hover:border-[#00E5C7]/50 text-center cursor-pointer bg-[#0A0A0B]/50 transition">
                 <UploadCloud className="w-8 h-8 text-[#00E5C7] mx-auto mb-1" />
-                <p className="text-xs font-bold text-white">Upload DL Photo or Fetch via DigiLocker</p>
-                <p className="text-[10px] text-slate-400">Parivahan Sarathi Gov Database Sync</p>
+                <p className="text-xs font-bold text-white">Upload Driving Licence (Front & Back)</p>
+                <p className="text-[10px] text-slate-400">Tesseract OCR + TBH Admin Verification</p>
               </div>
 
               {licenseSuccess ? (
                 <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold flex items-center justify-center space-x-2">
                   <CheckCircle2 className="w-4 h-4" />
-                  <span>License Verified Successfully!</span>
+                  <span>Licence Verified Successfully!</span>
                 </div>
               ) : (
                 <button
@@ -222,7 +232,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   disabled={isLicenseUploading}
                   className="w-full py-3 rounded-xl bg-gradient-to-r from-[#00E5C7] to-[#00B4D8] text-black font-extrabold text-xs shadow-teal-glow hover:opacity-95 transition"
                 >
-                  {isLicenseUploading ? 'Verifying with Parivahan Gov...' : 'Verify License & Complete KYC'}
+                  {isLicenseUploading ? 'Processing DL & OCR Verification...' : 'Submit DL for Verification'}
                 </button>
               )}
             </form>

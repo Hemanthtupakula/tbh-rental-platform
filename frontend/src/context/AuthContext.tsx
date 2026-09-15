@@ -31,7 +31,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const refreshTokenRef = useRef<string | null>(sessionStorage.getItem('tbh_refresh_token'));
 
   // Real Clerk React Authentication Integration
-  const { isSignedIn, userId, getToken, signOut: clerkSignOut } = useClerkAuth();
+  const { isLoaded, isSignedIn, userId, getToken, signOut: clerkSignOut } = useClerkAuth();
   const { user: clerkUser } = useClerkUser();
 
   // Persist user in session storage
@@ -48,7 +48,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     let isMounted = true;
 
     const syncWithBackend = async () => {
-      if (isSignedIn && userId) {
+      if (isLoaded && isSignedIn && userId) {
         try {
           const token = await getToken();
           if (token && isMounted) {
@@ -68,13 +68,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } catch (err) {
           console.error('[CLERK AUTH] Failed to sync session with TBH backend:', err);
         }
-      } else if (!isSignedIn && user?.token && user.token.startsWith('eyJ')) {
-        const currentToken = sessionStorage.getItem('tbh_token');
-        if (currentToken && currentToken === user.token) {
+      } else if (isLoaded && !isSignedIn && user?.clerkUserId) {
+        if (isMounted) {
           sessionStorage.removeItem('tbh_token');
           sessionStorage.removeItem('tbh_user');
           localStorage.removeItem('tbh_token');
-          if (isMounted) setUser(null);
+          setUser(null);
         }
       }
     };
@@ -84,7 +83,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => {
       isMounted = false;
     };
-  }, [isSignedIn, userId, clerkUser]);
+  }, [isLoaded, isSignedIn, userId, clerkUser]);
 
   // Handle successful auth tokens
   const handleAuthSuccess = (data: any) => {
@@ -285,10 +284,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const isAuthenticated = isLoaded ? (isSignedIn || (!!user && !user.clerkUserId)) : !!user;
+
   return (
     <AuthContext.Provider value={{
       user,
-      isAuthenticated: !!user,
+      isAuthenticated,
       loginWithEmail,
       signupWithEmail,
       sendOtp,
