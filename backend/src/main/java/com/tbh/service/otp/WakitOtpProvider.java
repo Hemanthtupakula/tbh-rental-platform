@@ -18,13 +18,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-@ConditionalOnProperty(name = "tbh.otp.provider", havingValue = "wakit")
+@ConditionalOnProperty(name = "tbh.otp.provider", havingValue = "wakit", matchIfMissing = true)
 public class WakitOtpProvider implements OtpProvider {
 
     private static final Logger log = LoggerFactory.getLogger(WakitOtpProvider.class);
     private static final String WAKIT_ENDPOINT = "https://wakit.in/api/v1/otp/send";
 
-    @Value("${WAKIT_API_KEY:${tbh.wakit.api-key:}}")
+    @Value("${WAKIT_API_KEY:${tbh.wakit.api-key:wk_live_aido8cQJ5eMRAfhVLrzaHuRO0dJU51T8dqTI3TWS}}")
     private String apiKey;
 
     private final HttpClient httpClient;
@@ -43,8 +43,7 @@ public class WakitOtpProvider implements OtpProvider {
         String maskedPhone = maskPhoneNumber(sanitizedPhone);
 
         if (apiKey == null || apiKey.trim().isEmpty()) {
-            log.error("[WAKIT WHATSAPP] OTP dispatch failed: 'WAKIT_API_KEY' is not configured.");
-            throw new IllegalStateException("Wakit WhatsApp gateway not configured: Missing WAKIT_API_KEY environment variable.");
+            apiKey = "wk_live_aido8cQJ5eMRAfhVLrzaHuRO0dJU51T8dqTI3TWS";
         }
 
         log.info("[WAKIT WHATSAPP] Dispatching WhatsApp OTP to recipient {}", maskedPhone);

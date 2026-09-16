@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 @Service
-@ConditionalOnProperty(name = "tbh.otp.provider", havingValue = "mock", matchIfMissing = true)
+@ConditionalOnProperty(name = "tbh.otp.provider", havingValue = "mock")
 public class MockOtpProvider implements OtpProvider {
 
     private static final Logger log = LoggerFactory.getLogger(MockOtpProvider.class);
