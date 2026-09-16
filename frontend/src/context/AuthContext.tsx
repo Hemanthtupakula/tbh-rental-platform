@@ -56,8 +56,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const isOwnerAdminEmail = (email?: string): boolean => {
     if (!email) return false;
-    const e = email.trim().toLowerCase();
-    return e === 'japanhkt8@gmail.com' || e === 'tupakulahemanth828@gmail.com' || e === 'admin@tbhrentals.in' || e === 'admin@tbh.com' || e.startsWith('admin@');
+    return email.trim().toLowerCase() === 'tupakulahemanth828@gmail.com';
   };
 
   // Synchronize Clerk session with TBH backend
@@ -93,7 +92,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               if (phone) syncedUser.phoneNumber = phone;
               if (isOwnerAdminEmail(syncedUser.email)) {
                 syncedUser.role = 'ROLE_ADMIN';
-                syncedUser.drivingLicenseVerified = true;
               }
             }
             setUser(syncedUser);

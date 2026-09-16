@@ -576,7 +576,7 @@ export const VehicleGalleryModal: React.FC<VehicleGalleryModalProps> = ({
       {/* Fullscreen Lightbox Modal */}
       {isFullscreen && (
         <div 
-          className="fixed inset-0 z-60 bg-black/95 flex flex-col items-center justify-center p-4 animate-fade-in"
+          className="fixed inset-0 z-[60] bg-black/95 flex flex-col items-center justify-center p-4 animate-fade-in"
           onClick={() => setIsFullscreen(false)}
         >
           <div className="absolute top-4 right-4 flex items-center space-x-2 z-10">

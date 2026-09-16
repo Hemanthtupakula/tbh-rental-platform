@@ -13,12 +13,7 @@ export const CLERK_PUBLISHABLE_KEY =
 
 function isOwnerAdminEmail(email?: string): boolean {
   if (!email) return false;
-  const e = email.trim().toLowerCase();
-  return e === 'japanhkt8@gmail.com' || 
-         e === 'tupakulahemanth828@gmail.com' || 
-         e === 'admin@tbhrentals.in' || 
-         e === 'admin@tbh.com' || 
-         e.startsWith('admin@');
+  return email.trim().toLowerCase() === 'tupakulahemanth828@gmail.com';
 }
 
 export async function syncClerkUserWithBackend(clerkToken: string): Promise<User | null> {
@@ -50,7 +45,7 @@ export async function syncClerkUserWithBackend(clerkToken: string): Promise<User
         email: data.email || '',
         phoneNumber: data.phoneNumber || '',
         role: isOwnerAdmin ? 'ROLE_ADMIN' : (data.role || 'ROLE_USER'),
-        drivingLicenseVerified: isOwnerAdmin ? true : (data.kycVerified ?? false),
+        drivingLicenseVerified: data.kycVerified ?? (data.drivingLicenseVerified ?? false),
         mobileVerified: data.mobileVerified ?? false,
         clerkUserId: data.clerkUserId
       };

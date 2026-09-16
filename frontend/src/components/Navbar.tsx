@@ -324,7 +324,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF37]" />
                     <span>Driving License & KYC</span>
                   </button>
-                  {(user?.role === 'ROLE_ADMIN' || user?.email?.toLowerCase() === 'tupakulahemanth828@gmail.com' || user?.email?.toLowerCase() === 'japanhkt8@gmail.com') && (
+                  {(user?.role === 'ROLE_ADMIN' || user?.email?.toLowerCase() === 'tupakulahemanth828@gmail.com') && (
                     <button 
                       onClick={() => { onOpenAdmin(); setShowUserDropdown(false); }}
                       className="w-full text-left px-2 py-1.5 rounded-lg text-xs font-bold text-amber-400 hover:bg-amber-500/10 transition flex items-center space-x-2"
