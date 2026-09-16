@@ -148,7 +148,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenInfoModal }) => {
           </div>
 
           <div className="text-[10px] text-slate-500 font-mono tracking-tight self-start md:self-auto">
-            Made with caffeine & energy by <span className="text-slate-400 font-semibold">Marlboro Debugger</span>
+            Made with caffeine & energy by <span className="text-slate-400 font-semibold">Marlboro Debbugers</span>
           </div>
         </div>
 
