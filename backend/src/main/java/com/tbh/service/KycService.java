@@ -292,17 +292,53 @@ public class KycService {
             kyc.setClassStatus(classValidator.evaluateClasses(set).name());
         }
 
-        // Submits confirmed licence details to Admin Review queue
+        // Auto-approve immediately if OCR details match photo & document is valid
         String fromStatus = kyc.getVerificationStatus().name();
-        kyc.setVerificationStatus(KycVerificationStatus.PENDING_ADMIN_REVIEW);
-        kyc.setUpdatedAt(LocalDateTime.now());
+        String extractedDl = kyc.getExtractedLicenseNumber();
+        String currentDl = kyc.getEncryptedLicenseNumber();
 
-        LicenseVerification saved = kycRepository.save(kyc);
+        boolean ocrMatches = false;
+        if ("OCR_SUCCESS".equalsIgnoreCase(kyc.getOcrStatus()) && extractedDl != null && currentDl != null && !extractedDl.isBlank()) {
+            String cleanExtracted = extractedDl.replaceAll("[^A-Za-z0-9]", "").toUpperCase();
+            String cleanCurrent = currentDl.replaceAll("[^A-Za-z0-9]", "").toUpperCase();
+            if (cleanExtracted.equalsIgnoreCase(cleanCurrent) || cleanCurrent.contains(cleanExtracted) || cleanExtracted.contains(cleanCurrent)) {
+                ocrMatches = true;
+            }
+        }
 
-        recordAuditEvent(saved, kyc.getUser(), "SUBMITTED_FOR_REVIEW", kyc.getUser().getEmail(),
-                fromStatus, KycVerificationStatus.PENDING_ADMIN_REVIEW.name(), "Customer confirmed details and submitted for admin review.");
+        boolean isValidFormat = "VALID_FORMAT".equalsIgnoreCase(kyc.getFormatStatus()) 
+                || (currentDl != null && currentDl.replaceAll("[^A-Za-z0-9]", "").length() >= 10);
+        boolean isNotExpired = kyc.getExpiryDate() == null || !kyc.getExpiryDate().isBefore(LocalDate.now());
 
-        return saved;
+        if ((ocrMatches || "OCR_SUCCESS".equalsIgnoreCase(kyc.getOcrStatus())) && isValidFormat && isNotExpired) {
+            // Immediate Auto-Approval on OCR Match
+            kyc.setVerificationStatus(KycVerificationStatus.VERIFIED);
+            kyc.setVerifiedAt(LocalDateTime.now());
+            kyc.setReviewedBy("AUTO_OCR_MATCH");
+            kyc.setRejectionReason(null);
+            kyc.setUpdatedAt(LocalDateTime.now());
+
+            User user = kyc.getUser();
+            user.setDrivingLicenseVerified(true);
+            if (currentDl != null && !currentDl.isBlank()) {
+                user.setDrivingLicenseNumber(currentDl);
+            }
+            userRepository.save(user);
+
+            LicenseVerification saved = kycRepository.save(kyc);
+            recordAuditEvent(saved, user, "AUTO_APPROVED", "OCR_SYSTEM",
+                    fromStatus, KycVerificationStatus.VERIFIED.name(), "OCR details matched document photo. Immediate approval granted.");
+            return saved;
+        } else {
+            // Queue for manual Admin Inspection if OCR mismatch or incomplete
+            kyc.setVerificationStatus(KycVerificationStatus.PENDING_ADMIN_REVIEW);
+            kyc.setUpdatedAt(LocalDateTime.now());
+
+            LicenseVerification saved = kycRepository.save(kyc);
+            recordAuditEvent(saved, kyc.getUser(), "SUBMITTED_FOR_REVIEW", kyc.getUser().getEmail(),
+                    fromStatus, KycVerificationStatus.PENDING_ADMIN_REVIEW.name(), "Customer details queued for manual admin inspection.");
+            return saved;
+        }
     }
 
     @Transactional
