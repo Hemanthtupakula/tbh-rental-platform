@@ -14,6 +14,7 @@ import {
   Sparkles,
   AlertTriangle,
   Tag,
+  Layers,
   User as UserIcon
 } from 'lucide-react';
 import { Vehicle, City, Booking } from '../types';
