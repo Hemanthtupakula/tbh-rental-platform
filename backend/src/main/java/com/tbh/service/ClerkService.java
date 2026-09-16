@@ -41,6 +41,10 @@ public class ClerkService {
      */
     public boolean syncUserMobileVerification(User user) {
         if (user == null) return false;
+        if (user.isMobileVerified()) {
+            return true;
+        }
+
         String clerkUserId = user.getClerkUserId();
         if (clerkUserId == null || clerkUserId.isBlank()) {
             return user.isMobileVerified();
@@ -86,19 +90,14 @@ public class ClerkService {
                         user.setPhoneNumber(verifiedPhone);
                     }
                     userRepository.save(user);
-                    log.info("[CLERK SERVICE] User {} mobile authoritatively verified: {}", user.getEmail(), verifiedPhone);
+                    log.info("[CLERK SERVICE] User {} mobile authoritatively verified via Clerk: {}", user.getEmail(), verifiedPhone);
                     return true;
-                } else {
-                    user.setMobileVerified(false);
-                    userRepository.save(user);
-                    log.info("[CLERK SERVICE] User {} mobile verification status is false", user.getEmail());
-                    return false;
                 }
             } else {
                 log.warn("[CLERK SERVICE] Clerk API returned status {} for user {}", resp.statusCode(), clerkUserId);
             }
         } catch (Exception e) {
-            log.warn("[CLERK SERVICE] Failed to authoritatively sync mobile status from Clerk: {}", e.getMessage());
+            log.warn("[CLERK SERVICE] Failed to sync mobile status from Clerk: {}", e.getMessage());
         }
         return user.isMobileVerified();
     }

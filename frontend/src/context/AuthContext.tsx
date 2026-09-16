@@ -21,6 +21,7 @@ interface AuthContextType {
   loginWithClerkToken: (token: string) => Promise<boolean>;
   logout: () => Promise<void>;
   updateUser: (fields: Partial<User>) => void;
+  saveProfile: (data: { fullName?: string; aadhaarNumber?: string; phoneNumber?: string }) => Promise<User>;
   refreshUser: () => Promise<void>;
 }
 
@@ -85,11 +86,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (syncedUser) {
             if (clerkUser) {
               const displayName = clerkUser.fullName || `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim();
-              if (displayName) syncedUser.fullName = displayName;
+              if (displayName && (!syncedUser.fullName || syncedUser.fullName === 'TBH Rider')) {
+                syncedUser.fullName = displayName;
+              }
               const email = clerkUser.primaryEmailAddress?.emailAddress;
-              if (email) syncedUser.email = email;
+              if (email && !syncedUser.email) syncedUser.email = email;
               const phone = clerkUser.primaryPhoneNumber?.phoneNumber;
-              if (phone) syncedUser.phoneNumber = phone;
+              if (phone && !syncedUser.phoneNumber) syncedUser.phoneNumber = phone;
               if (isOwnerAdminEmail(syncedUser.email)) {
                 syncedUser.role = 'ROLE_ADMIN';
               }
@@ -98,7 +101,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             sessionStorage.setItem('tbh_user', JSON.stringify(syncedUser));
             setTbhUserError(null);
           } else {
-            // If backend sync returned null but Clerk user exists, build reliable client fallback user immediately!
+            // If backend sync returned null but Clerk user exists, build fallback user without fake verification
             if (clerkUser) {
               const fallbackEmail = clerkUser.primaryEmailAddress?.emailAddress || '';
               const isAdmin = isOwnerAdminEmail(fallbackEmail);
@@ -109,7 +112,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 phoneNumber: clerkUser.primaryPhoneNumber?.phoneNumber || '',
                 role: isAdmin ? 'ROLE_ADMIN' : 'ROLE_USER',
                 drivingLicenseVerified: isAdmin,
-                mobileVerified: true,
+                mobileVerified: false,
                 clerkUserId: userId
               };
               setUser(fallbackUser);
@@ -364,6 +367,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const saveProfile = async (data: { fullName?: string; aadhaarNumber?: string; phoneNumber?: string }): Promise<User> => {
+    const updatedUser = await api.saveProfile(data);
+    if (updatedUser) {
+      setUser(prev => {
+        const merged = { ...(prev || {}), ...updatedUser };
+        sessionStorage.setItem('tbh_user', JSON.stringify(merged));
+        return merged;
+      });
+      return updatedUser;
+    }
+    throw new Error('Profile update failed.');
+  };
+
   const isAuthenticated = isClerkSignedIn ? Boolean(user) : (isLoaded ? Boolean(user && !user.clerkUserId) : Boolean(user));
 
   return (
@@ -384,6 +400,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       loginWithClerkToken,
       logout,
       updateUser,
+      saveProfile,
       refreshUser
     }}>
       {children}

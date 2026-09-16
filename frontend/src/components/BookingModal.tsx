@@ -191,9 +191,8 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   // KYC Verified Status (Checks user object or fresh status from backend)
   const isKycVerified = isKycVerifiedState || user?.drivingLicenseVerified === true;
 
-  // Strict Authoritative Mobile Verification Gate:
-  // True if mobileVerified flag is set OR if user already has a phone number on record
-  const isMobileVerified = user?.mobileVerified === true || (!!user?.phoneNumber && user.phoneNumber.length >= 10);
+  // Strict Authoritative Mobile Verification Gate (Backend MySQL user.mobile_verified):
+  const isMobileVerified = user?.mobileVerified === true;
 
   const handleApplyCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1036,10 +1035,10 @@ export const BookingModal: React.FC<BookingModalProps> = ({
       <PhoneVerificationModal
         isOpen={isPhoneModalOpen}
         onClose={() => setIsPhoneModalOpen(false)}
-        onVerificationSuccess={(phone) => {
-          updateUser({ mobileVerified: true, phoneNumber: phone });
-          refreshUser();
+        onVerificationSuccess={async (phone) => {
+          setErrorMessage(null);
           setIsPhoneModalOpen(false);
+          await refreshUser();
         }}
       />
 

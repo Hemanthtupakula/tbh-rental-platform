@@ -3170,6 +3170,13 @@ export const api = {
     return await res.blob();
   },
 
+  async saveProfile(data: { fullName?: string; aadhaarNumber?: string; phoneNumber?: string }): Promise<User> {
+    return await apiFetch<User>('/auth/profile', {
+      method: 'PATCH',
+      body: JSON.stringify(data)
+    });
+  },
+
   async syncClerkMobile(): Promise<{ mobileVerified: boolean; phoneNumber?: string }> {
     return await apiFetch<{ mobileVerified: boolean; phoneNumber?: string }>('/auth/clerk/sync-mobile', {
       method: 'POST'
@@ -3185,12 +3192,12 @@ export const api = {
   },
 
   /** Verify Wakit WhatsApp OTP; on success backend marks user mobileVerified=true */
-  async verifyMobileOtp(phoneNumber: string, otp: string): Promise<{ mobileVerified: boolean; phoneNumber?: string }> {
+  async verifyMobileOtp(phoneNumber: string, otp: string): Promise<any> {
     const res = await apiFetch<any>('/auth/verify-otp', {
       method: 'POST',
       body: JSON.stringify({ phoneNumber, otp })
     });
-    return { mobileVerified: true, phoneNumber: res.phoneNumber ?? phoneNumber };
+    return res;
   },
 
 

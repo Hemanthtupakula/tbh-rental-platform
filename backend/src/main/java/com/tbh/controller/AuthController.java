@@ -180,10 +180,15 @@ public class AuthController {
         }
         try {
             String fullName = body.get("fullName");
-            if (fullName == null || fullName.trim().isEmpty()) {
-                return ResponseEntity.badRequest().body(Map.of("message", "Name cannot be empty."));
-            }
-            AuthResponse response = authService.updateProfile(authentication.getName(), fullName.trim());
+            String aadhaarNumber = body.get("aadhaarNumber");
+            String phoneNumber = body.get("phoneNumber");
+
+            AuthResponse response = authService.updateProfile(
+                    authentication.getName(),
+                    fullName,
+                    aadhaarNumber,
+                    phoneNumber
+            );
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));

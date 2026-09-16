@@ -401,19 +401,39 @@ public class AuthService {
         return userRepository.findByEmail(email.trim().toLowerCase());
     }
 
-    public AuthResponse updateProfile(String email, String newFullName) {
+    public AuthResponse updateProfile(String email, String newFullName, String newAadhaarNumber, String newPhoneNumber) {
         User user = userRepository.findByEmail(email.trim().toLowerCase())
                 .orElseThrow(() -> new IllegalArgumentException("User not found."));
-        if (newFullName == null || newFullName.trim().isEmpty()) {
-            throw new IllegalArgumentException("Name cannot be empty.");
+
+        if (newFullName != null && !newFullName.trim().isEmpty()) {
+            user.setFullName(newFullName.trim());
         }
-        user.setFullName(newFullName.trim());
+
+        if (newAadhaarNumber != null && !newAadhaarNumber.trim().isEmpty()) {
+            String cleanAadhaar = newAadhaarNumber.replaceAll("[^0-9]", "");
+            if (cleanAadhaar.length() == 12) {
+                user.setAadhaarNumber(cleanAadhaar);
+            } else if (!newAadhaarNumber.contains("•")) {
+                throw new IllegalArgumentException("Aadhaar number must be a 12-digit Indian unique identity number.");
+            }
+        }
+
+        if (newPhoneNumber != null && !newPhoneNumber.trim().isEmpty()) {
+            String cleanPhone = sanitizePhone(newPhoneNumber);
+            if (cleanPhone.length() >= 10) {
+                user.setPhoneNumber(cleanPhone);
+            }
+        }
+
         user = userRepository.save(user);
         String token = tokenProvider.generateToken(user.getId(), user.getEmail(), user.getRole().name());
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
         return toAuthResponse(user, token, refreshToken);
     }
 
+    public AuthResponse updateProfile(String email, String newFullName) {
+        return updateProfile(email, newFullName, null, null);
+    }
 
     private AuthResponse toAuthResponse(User user, String token, RefreshToken refreshToken) {
         String maskedDl = user.getDrivingLicenseNumber() != null
@@ -436,7 +456,8 @@ public class AuthService {
                 user.getRole().name(),
                 user.isDrivingLicenseVerified(),
                 maskedDl,
-                maskedAadhaar
+                maskedAadhaar,
+                user.isMobileVerified()
         );
     }
 

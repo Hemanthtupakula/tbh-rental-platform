@@ -12,6 +12,8 @@ public class AuthResponse {
     private String drivingLicenseNumber;
     private String aadhaarNumber;
 
+    private boolean mobileVerified;
+
     public AuthResponse() {}
 
     public AuthResponse(String token, Long userId, String fullName, String email, String phoneNumber, String role, boolean drivingLicenseVerified, String drivingLicenseNumber) {
@@ -50,6 +52,20 @@ public class AuthResponse {
         this.aadhaarNumber = aadhaarNumber;
     }
 
+    public AuthResponse(String token, String refreshToken, Long userId, String fullName, String email, String phoneNumber, String role, boolean drivingLicenseVerified, String drivingLicenseNumber, String aadhaarNumber, boolean mobileVerified) {
+        this.token = token;
+        this.refreshToken = refreshToken;
+        this.userId = userId;
+        this.fullName = fullName;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.role = role;
+        this.drivingLicenseVerified = drivingLicenseVerified;
+        this.drivingLicenseNumber = drivingLicenseNumber;
+        this.aadhaarNumber = aadhaarNumber;
+        this.mobileVerified = mobileVerified;
+    }
+
     public String getToken() { return token; }
     public void setToken(String token) { this.token = token; }
 
@@ -79,4 +95,7 @@ public class AuthResponse {
 
     public String getAadhaarNumber() { return aadhaarNumber; }
     public void setAadhaarNumber(String aadhaarNumber) { this.aadhaarNumber = aadhaarNumber; }
+
+    public boolean isMobileVerified() { return mobileVerified; }
+    public void setMobileVerified(boolean mobileVerified) { this.mobileVerified = mobileVerified; }
 }
