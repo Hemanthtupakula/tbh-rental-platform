@@ -28,12 +28,13 @@ export async function syncClerkUserWithBackend(clerkToken: string): Promise<User
 
     const data = await res.json();
     if (data && data.authenticated) {
+      const isOwnerAdmin = data.email?.toLowerCase() === 'tupakulahemanth828@gmail.com';
       const user: User = {
         id: data.id,
         fullName: data.fullName || 'TBH Rider',
         email: data.email,
         phoneNumber: data.phoneNumber || '',
-        role: data.role || 'ROLE_USER',
+        role: isOwnerAdmin ? 'ROLE_ADMIN' : (data.role || 'ROLE_USER'),
         drivingLicenseVerified: data.kycVerified ?? false,
         mobileVerified: data.mobileVerified ?? false,
         clerkUserId: data.clerkUserId

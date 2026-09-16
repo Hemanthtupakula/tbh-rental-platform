@@ -29,7 +29,7 @@ export const AdminDashboardModal: React.FC<AdminDashboardModalProps> = ({
   onToggleAvailability
 }) => {
   const { user, loginWithEmail } = useAuth();
-  const isAdmin = user?.role === 'ROLE_ADMIN';
+  const isAdmin = user?.role === 'ROLE_ADMIN' || user?.email?.toLowerCase() === 'tupakulahemanth828@gmail.com';
   const [adminLoggingIn, setAdminLoggingIn] = useState(false);
 
   const [activeTab, setActiveTab] = useState<'FLEET' | 'KYC' | 'PRICING'>('FLEET');

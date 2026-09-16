@@ -193,7 +193,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
 
           {/* Admin Panel Toggle - Strictly for verified ROLE_ADMIN */}
-          {user?.role === 'ROLE_ADMIN' && (
+          {(user?.role === 'ROLE_ADMIN' || user?.email?.toLowerCase() === 'tupakulahemanth828@gmail.com') && (
             <button 
               onClick={onOpenAdmin}
               className="hidden md:flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-xs font-semibold text-amber-300 hover:text-white hover:border-amber-400/50 transition"
@@ -262,7 +262,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF37]" />
                     <span>Driving License & KYC</span>
                   </button>
-                  {user?.role === 'ROLE_ADMIN' && (
+                  {(user?.role === 'ROLE_ADMIN' || user?.email?.toLowerCase() === 'tupakulahemanth828@gmail.com') && (
                     <button 
                       onClick={() => { onOpenAdmin(); setShowUserDropdown(false); }}
                       className="w-full text-left px-2 py-1.5 rounded-lg text-xs font-bold text-amber-400 hover:bg-amber-500/10 transition flex items-center space-x-2"
