@@ -3170,6 +3170,20 @@ export const api = {
     return await res.blob();
   },
 
+  async fetchKycDocumentSide(kycId: number, side: 'front' | 'back'): Promise<Blob> {
+    const token = await getFreshAuthToken();
+    const url = `${API_BASE}/kyc/document/${kycId}/${side}`;
+    const res = await fetch(url, {
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+    });
+    if (!res.ok) throw new Error(`Failed to load ${side} document`);
+    return await res.blob();
+  },
+
+  async getKycById(kycId: number): Promise<any> {
+    return await apiFetch<any>(`/admin/kyc/${kycId}`);
+  },
+
   async saveProfile(data: { fullName?: string; aadhaarNumber?: string; phoneNumber?: string }): Promise<User> {
     return await apiFetch<User>('/auth/profile', {
       method: 'PATCH',

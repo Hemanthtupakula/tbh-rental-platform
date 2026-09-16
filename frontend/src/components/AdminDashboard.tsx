@@ -129,6 +129,27 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [auditEvents, setAuditEvents] = useState<any[]>([]);
   const [loadingAudit, setLoadingAudit] = useState(false);
 
+  // Dedicated KYC Review Modal State
+  const [reviewKycModalOpen, setReviewKycModalOpen] = useState(false);
+  const [reviewKycRecord, setReviewKycRecord] = useState<LicenseVerification | null>(null);
+  const [frontDocBlobUrl, setFrontDocBlobUrl] = useState<string | null>(null);
+  const [backDocBlobUrl, setBackDocBlobUrl] = useState<string | null>(null);
+  const [loadingFrontDoc, setLoadingFrontDoc] = useState(false);
+  const [loadingBackDoc, setLoadingBackDoc] = useState(false);
+  const [frontDocError, setFrontDocError] = useState<string | null>(null);
+  const [backDocError, setBackDocError] = useState<string | null>(null);
+
+  const [reviewAuditEvents, setReviewAuditEvents] = useState<any[]>([]);
+  const [loadingReviewAudit, setLoadingReviewAudit] = useState(false);
+
+  const [reviewPresetReason, setReviewPresetReason] = useState<string>('Document unreadable');
+  const [reviewCustomReason, setReviewCustomReason] = useState<string>('');
+  const [showReviewRejectForm, setShowReviewRejectForm] = useState<boolean>(false);
+  const [showReviewApproveConfirm, setShowReviewApproveConfirm] = useState<boolean>(false);
+  const [reviewSubmitting, setReviewSubmitting] = useState<boolean>(false);
+
+  const [reviewZoomImage, setReviewZoomImage] = useState<{ url: string; title: string } | null>(null);
+
   // Search/filter
   const [bookingSearch, setBookingSearch] = useState('');
   const [customerSearch, setCustomerSearch] = useState('');
@@ -243,6 +264,138 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       setPreviewDocUrl(objUrl);
     } catch {
       setPreviewDocUrl(docUrl.startsWith('http') ? docUrl : `${API_BASE}/${docUrl}`);
+    }
+  };
+
+  const cleanupDocBlobs = () => {
+    if (frontDocBlobUrl) {
+      URL.revokeObjectURL(frontDocBlobUrl);
+      setFrontDocBlobUrl(null);
+    }
+    if (backDocBlobUrl) {
+      URL.revokeObjectURL(backDocBlobUrl);
+      setBackDocBlobUrl(null);
+    }
+  };
+
+  const handleOpenReviewModal = async (record: LicenseVerification) => {
+    cleanupDocBlobs();
+    setReviewKycRecord(record);
+    setReviewKycModalOpen(true);
+    setShowReviewRejectForm(false);
+    setShowReviewApproveConfirm(false);
+    setReviewPresetReason('Document unreadable');
+    setReviewCustomReason('');
+    setFrontDocError(null);
+    setBackDocError(null);
+
+    if (record.id) {
+      // Fetch Front Document
+      setLoadingFrontDoc(true);
+      try {
+        const frontBlob = await api.fetchKycDocumentSide(record.id, 'front');
+        const frontUrl = URL.createObjectURL(frontBlob);
+        setFrontDocBlobUrl(frontUrl);
+      } catch (err) {
+        setFrontDocError('Front document unavailable');
+      } finally {
+        setLoadingFrontDoc(false);
+      }
+
+      // Fetch Back Document
+      setLoadingBackDoc(true);
+      try {
+        const backBlob = await api.fetchKycDocumentSide(record.id, 'back');
+        const backUrl = URL.createObjectURL(backBlob);
+        setBackDocBlobUrl(backUrl);
+      } catch (err) {
+        setBackDocError('Back document unavailable');
+      } finally {
+        setLoadingBackDoc(false);
+      }
+
+      // Fetch Audit History
+      setLoadingReviewAudit(true);
+      try {
+        const logs = await api.getKycAudit(record.id);
+        setReviewAuditEvents(logs || []);
+      } catch {
+        setReviewAuditEvents([]);
+      } finally {
+        setLoadingReviewAudit(false);
+      }
+    }
+  };
+
+  const handleOpenUserKycReview = async (u: any) => {
+    let match = allKyc.find(k => (k.user && k.user.id === u.id) || k.userId === u.id);
+    if (!match && u.id) {
+      try {
+        const statusRes = await api.getKycStatus(u.id);
+        if (statusRes && statusRes.id) {
+          match = statusRes;
+        }
+      } catch (e) {
+        console.warn('Could not load user KYC status:', e);
+      }
+    }
+    if (match) {
+      handleOpenReviewModal(match);
+    } else {
+      alert(`No active Driving Licence KYC submission found for customer ${u.fullName || u.email}.`);
+    }
+  };
+
+  const handleConfirmReviewApprove = async () => {
+    if (!reviewKycRecord || !reviewKycRecord.id) return;
+    setReviewSubmitting(true);
+    try {
+      await api.reviewKyc(reviewKycRecord.id, 'TBH_VERIFIED');
+      setShowReviewApproveConfirm(false);
+      
+      // Update local states immediately
+      setPendingKyc(prev => prev.filter(k => k.id !== reviewKycRecord.id));
+      setAllKyc(prev => prev.map(k => k.id === reviewKycRecord.id ? { ...k, status: 'TBH_VERIFIED' as any, verificationStatus: 'TBH_VERIFIED' } : k));
+      setUserList(prev => prev.map(u => (u.id === (reviewKycRecord.user?.id || reviewKycRecord.userId)) ? { ...u, drivingLicenseVerified: true } : u));
+      
+      setReviewKycRecord(prev => prev ? { ...prev, status: 'TBH_VERIFIED' as any, verificationStatus: 'TBH_VERIFIED', verified: true } : null);
+
+      // Refresh Audit log
+      const freshLogs = await api.getKycAudit(reviewKycRecord.id);
+      setReviewAuditEvents(freshLogs || []);
+    } catch (err: any) {
+      alert('Approval failed: ' + (err.message || 'Server error'));
+    } finally {
+      setReviewSubmitting(false);
+    }
+  };
+
+  const handleConfirmReviewReject = async () => {
+    if (!reviewKycRecord || !reviewKycRecord.id) return;
+    const finalReason = reviewPresetReason === 'Other / Custom reason' ? reviewCustomReason.trim() : reviewPresetReason;
+    if (!finalReason) {
+      alert('Please select or enter a valid rejection reason.');
+      return;
+    }
+    setReviewSubmitting(true);
+    try {
+      await api.reviewKyc(reviewKycRecord.id, 'REJECTED', finalReason);
+      setShowReviewRejectForm(false);
+      
+      // Update local states immediately
+      setPendingKyc(prev => prev.filter(k => k.id !== reviewKycRecord.id));
+      setAllKyc(prev => prev.map(k => k.id === reviewKycRecord.id ? { ...k, status: 'REJECTED' as any, verificationStatus: 'REJECTED', rejectionReason: finalReason } : k));
+      setUserList(prev => prev.map(u => (u.id === (reviewKycRecord.user?.id || reviewKycRecord.userId)) ? { ...u, drivingLicenseVerified: false } : u));
+
+      setReviewKycRecord(prev => prev ? { ...prev, status: 'REJECTED' as any, verificationStatus: 'REJECTED', rejectionReason: finalReason, verified: false } : null);
+
+      // Refresh Audit log
+      const freshLogs = await api.getKycAudit(reviewKycRecord.id);
+      setReviewAuditEvents(freshLogs || []);
+    } catch (err: any) {
+      alert('Rejection failed: ' + (err.message || 'Server error'));
+    } finally {
+      setReviewSubmitting(false);
     }
   };
 
@@ -834,6 +987,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       }`}>
                         {u.drivingLicenseVerified ? `DL: ${u.drivingLicenseNumber || 'Verified'}` : 'DL Pending'}
                       </span>
+                      <button
+                        onClick={() => handleOpenUserKycReview(u)}
+                        className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-[#00E5C7]/10 hover:bg-[#00E5C7]/20 text-[#00E5C7] font-bold text-[11px] border border-[#00E5C7]/30 transition"
+                      >
+                        <ShieldCheck className="w-3.5 h-3.5" />
+                        <span>Review KYC</span>
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -897,6 +1057,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       </div>
 
                       <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => handleOpenReviewModal(item)}
+                          className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#00E5C7]/20 hover:bg-[#00E5C7]/30 text-[#00E5C7] text-xs font-bold border border-[#00E5C7]/40 transition shadow-sm"
+                        >
+                          <ShieldCheck className="w-3.5 h-3.5" />
+                          <span>Review KYC</span>
+                        </button>
                         {item.documentUrl && (
                           <button
                             onClick={() => handlePreviewDoc(item.documentUrl!, `Licence - ${item.fullName || item.maskedLicenseNumber || 'Customer'}`)}
@@ -1646,6 +1813,417 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 ))
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* =================================================================== */}
+      {/* DETAILED ADMIN KYC REVIEW MODAL */}
+      {/* =================================================================== */}
+      {reviewKycModalOpen && reviewKycRecord && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md overflow-y-auto">
+          <div className="relative w-full max-w-5xl bg-[#141416] border border-white/10 rounded-2xl shadow-2xl overflow-hidden my-auto max-h-[90vh] flex flex-col">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-5 border-b border-white/10 bg-[#0A0A0B]">
+              <div className="flex items-center space-x-3">
+                <div className="p-2.5 rounded-xl bg-[#00E5C7]/10 text-[#00E5C7]">
+                  <ShieldCheck className="w-6 h-6" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-white tracking-wide flex items-center gap-2">
+                    <span>KYC Review</span>
+                    <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold uppercase ${
+                      (reviewKycRecord.status === 'VERIFIED' || reviewKycRecord.status === 'TBH_VERIFIED' || reviewKycRecord.verificationStatus === 'TBH_VERIFIED')
+                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                        : (reviewKycRecord.status === 'REJECTED' || reviewKycRecord.verificationStatus === 'REJECTED')
+                        ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                        : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                    }`}>
+                      {reviewKycRecord.verificationStatus || reviewKycRecord.status}
+                    </span>
+                  </h2>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    Customer: <strong className="text-white">{reviewKycRecord.user?.fullName || reviewKycRecord.extractedName || reviewKycRecord.fullName || 'TBH Rider'}</strong> (User ID: #{reviewKycRecord.user?.id || reviewKycRecord.userId || reviewKycRecord.id})
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  cleanupDocBlobs();
+                  setReviewKycModalOpen(false);
+                  setReviewKycRecord(null);
+                }}
+                className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Scrollable Body */}
+            <div className="p-6 overflow-y-auto space-y-6 flex-1 text-xs">
+
+              {/* 1. Customer & Licence Details Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                
+                {/* Customer Information Card */}
+                <div className="bg-[#0A0A0B] p-4 rounded-xl border border-white/5 space-y-3">
+                  <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center space-x-1.5">
+                    <Users className="w-3.5 h-3.5 text-[#00E5C7]" />
+                    <span>Customer Details</span>
+                  </h3>
+                  <div className="grid grid-cols-2 gap-3 text-slate-300">
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">Full Name</span>
+                      <span className="font-semibold text-white">{reviewKycRecord.user?.fullName || reviewKycRecord.extractedName || reviewKycRecord.fullName || 'N/A'}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">Email Address</span>
+                      <span className="font-mono text-white truncate block">{reviewKycRecord.user?.email || 'N/A'}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">Mobile Phone</span>
+                      <span className="font-mono text-white">{reviewKycRecord.user?.phoneNumber || 'N/A'}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">Submission Date</span>
+                      <span className="font-mono text-slate-300">
+                        {reviewKycRecord.submittedAt ? new Date(reviewKycRecord.submittedAt).toLocaleString('en-IN') : 'N/A'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Licence & Automated Checks Card */}
+                <div className="bg-[#0A0A0B] p-4 rounded-xl border border-white/5 space-y-3">
+                  <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center space-x-1.5">
+                    <FileText className="w-3.5 h-3.5 text-[#00E5C7]" />
+                    <span>Licence & Automated Inspection</span>
+                  </h3>
+                  <div className="grid grid-cols-2 gap-3 text-slate-300">
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">Licence Number</span>
+                      <span className="font-mono font-bold text-white">
+                        {reviewKycRecord.licenseNumber || reviewKycRecord.extractedLicenseNumber || reviewKycRecord.maskedLicenseNumber || reviewKycRecord.user?.drivingLicenseNumber || 'Licence number not extracted'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">Expiry Date</span>
+                      <span className="font-mono text-white">
+                        {reviewKycRecord.expiryDate || reviewKycRecord.extractedExpiryDate || 'Expiry date not available'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">Vehicle Classes</span>
+                      <span className="font-mono text-white">
+                        {reviewKycRecord.extractedVehicleClasses || reviewKycRecord.classStatus || 'Vehicle class not specified'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">Document Quality</span>
+                      <span className="font-bold text-emerald-400">
+                        {reviewKycRecord.documentQualityStatus || 'GOOD'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Honest OCR Status Banner */}
+                  <div className="pt-2 border-t border-white/5 flex items-center justify-between">
+                    <span className="text-[10px] text-slate-400">OCR Engine Status:</span>
+                    {reviewKycRecord.ocrStatus === 'OCR_UNAVAILABLE' || !reviewKycRecord.ocrStatus ? (
+                      <span className="px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 text-[10px] font-bold border border-amber-500/30">
+                        OCR UNAVAILABLE — MANUAL REVIEW ENABLED
+                      </span>
+                    ) : reviewKycRecord.ocrStatus === 'OCR_SUCCESS' ? (
+                      <span className="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 text-[10px] font-bold border border-emerald-500/30">
+                        OCR SUCCESS — DATA EXTRACTED
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded bg-slate-500/20 text-slate-300 text-[10px] font-bold">
+                        {reviewKycRecord.ocrStatus}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+              </div>
+
+              {/* 2. Document Previews (Front and Back side-by-side on desktop, stacked on mobile) */}
+              <div className="space-y-3">
+                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center space-x-1.5">
+                  <Eye className="w-3.5 h-3.5 text-[#00E5C7]" />
+                  <span>Document Image Verification</span>
+                </h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  
+                  {/* Front Document Box */}
+                  <div className="bg-[#0A0A0B] p-4 rounded-xl border border-white/5 space-y-2 flex flex-col">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-slate-200 text-xs tracking-wider">DRIVING LICENCE — FRONT</span>
+                      {frontDocBlobUrl && (
+                        <button
+                          onClick={() => setReviewZoomImage({ url: frontDocBlobUrl, title: 'Driving Licence — Front' })}
+                          className="text-[11px] text-[#00E5C7] hover:underline flex items-center space-x-1 font-semibold"
+                        >
+                          <Eye className="w-3 h-3" />
+                          <span>Click to Zoom</span>
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="relative min-h-[220px] max-h-[300px] bg-[#141416] rounded-lg border border-white/10 flex items-center justify-center overflow-hidden p-2">
+                      {loadingFrontDoc ? (
+                        <div className="text-center p-6 text-slate-400 space-y-2">
+                          <RefreshCw className="w-6 h-6 animate-spin text-[#00E5C7] mx-auto" />
+                          <p className="text-xs">Loading front document image...</p>
+                        </div>
+                      ) : frontDocError ? (
+                        <div className="text-center p-6 text-amber-400/90 space-y-1">
+                          <AlertTriangle className="w-8 h-8 text-amber-400 mx-auto mb-1" />
+                          <p className="font-bold text-xs">{frontDocError}</p>
+                          <p className="text-[10px] text-slate-400">Front document was not uploaded or is inaccessible.</p>
+                        </div>
+                      ) : frontDocBlobUrl ? (
+                        <img
+                          src={frontDocBlobUrl}
+                          alt="Driving Licence Front"
+                          className="max-h-[260px] w-auto object-contain rounded cursor-pointer hover:opacity-95 transition"
+                          onClick={() => setReviewZoomImage({ url: frontDocBlobUrl, title: 'Driving Licence — Front' })}
+                          onError={() => setFrontDocError('Front document unavailable')}
+                        />
+                      ) : (
+                        <p className="text-slate-500 text-xs">Front document unavailable</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Back Document Box */}
+                  <div className="bg-[#0A0A0B] p-4 rounded-xl border border-white/5 space-y-2 flex flex-col">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-slate-200 text-xs tracking-wider">DRIVING LICENCE — BACK</span>
+                      {backDocBlobUrl && (
+                        <button
+                          onClick={() => setReviewZoomImage({ url: backDocBlobUrl, title: 'Driving Licence — Back' })}
+                          className="text-[11px] text-[#00E5C7] hover:underline flex items-center space-x-1 font-semibold"
+                        >
+                          <Eye className="w-3 h-3" />
+                          <span>Click to Zoom</span>
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="relative min-h-[220px] max-h-[300px] bg-[#141416] rounded-lg border border-white/10 flex items-center justify-center overflow-hidden p-2">
+                      {loadingBackDoc ? (
+                        <div className="text-center p-6 text-slate-400 space-y-2">
+                          <RefreshCw className="w-6 h-6 animate-spin text-[#00E5C7] mx-auto" />
+                          <p className="text-xs">Loading back document image...</p>
+                        </div>
+                      ) : backDocError ? (
+                        <div className="text-center p-6 text-amber-400/90 space-y-1">
+                          <AlertTriangle className="w-8 h-8 text-amber-400 mx-auto mb-1" />
+                          <p className="font-bold text-xs">{backDocError}</p>
+                          <p className="text-[10px] text-slate-400">Back document was not uploaded or is inaccessible.</p>
+                        </div>
+                      ) : backDocBlobUrl ? (
+                        <img
+                          src={backDocBlobUrl}
+                          alt="Driving Licence Back"
+                          className="max-h-[260px] w-auto object-contain rounded cursor-pointer hover:opacity-95 transition"
+                          onClick={() => setReviewZoomImage({ url: backDocBlobUrl, title: 'Driving Licence — Back' })}
+                          onError={() => setBackDocError('Back document unavailable')}
+                        />
+                      ) : (
+                        <p className="text-slate-500 text-xs">Back document unavailable</p>
+                      )}
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              {/* 3. Admin Decision Panel */}
+              <div className="bg-[#0A0A0B] p-5 rounded-xl border border-white/10 space-y-4">
+                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center space-x-1.5">
+                  <Lock className="w-3.5 h-3.5 text-[#00E5C7]" />
+                  <span>Admin Verification Decision</span>
+                </h3>
+
+                {(reviewKycRecord.status === 'VERIFIED' || reviewKycRecord.status === 'TBH_VERIFIED' || reviewKycRecord.verificationStatus === 'TBH_VERIFIED') ? (
+                  <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center space-x-3 text-emerald-300">
+                    <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
+                    <div>
+                      <p className="font-bold text-xs">KYC Status: TBH VERIFIED</p>
+                      <p className="text-[11px] text-slate-300 mt-0.5">This customer has been authorized for TBH vehicle rentals.</p>
+                    </div>
+                  </div>
+                ) : (reviewKycRecord.status === 'REJECTED' || reviewKycRecord.verificationStatus === 'REJECTED') ? (
+                  <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 space-y-1 text-rose-300">
+                    <div className="flex items-center space-x-2 font-bold text-xs">
+                      <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                      <span>KYC Status: REJECTED</span>
+                    </div>
+                    <p className="text-[11px] text-slate-300">
+                      Reason: <strong className="text-rose-200">{reviewKycRecord.rejectionReason || 'Driving licence submission did not meet verification criteria.'}</strong>
+                    </p>
+                  </div>
+                ) : null}
+
+                {/* Primary Decision Action Buttons */}
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    onClick={() => setShowReviewApproveConfirm(true)}
+                    disabled={reviewSubmitting}
+                    className="flex-1 min-w-[160px] py-2.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs transition flex items-center justify-center space-x-2 shadow-lg shadow-emerald-500/20 disabled:opacity-50"
+                  >
+                    <Check className="w-4 h-4 stroke-[3]" />
+                    <span>APPROVE KYC</span>
+                  </button>
+
+                  <button
+                    onClick={() => setShowReviewRejectForm(prev => !prev)}
+                    disabled={reviewSubmitting}
+                    className="flex-1 min-w-[160px] py-2.5 px-4 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 font-extrabold text-xs border border-rose-500/30 transition flex items-center justify-center space-x-2 disabled:opacity-50"
+                  >
+                    <X className="w-4 h-4 stroke-[3]" />
+                    <span>REJECT KYC</span>
+                  </button>
+                </div>
+
+                {/* Approve Confirmation Modal */}
+                {showReviewApproveConfirm && (
+                  <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/40 space-y-3">
+                    <p className="font-bold text-emerald-300 text-xs">
+                      Approve this Driving Licence KYC submission?
+                    </p>
+                    <p className="text-[11px] text-slate-300">
+                      This will grant <strong className="text-white">{reviewKycRecord.user?.fullName || 'the customer'}</strong> rental clearance across all TBH vehicles.
+                    </p>
+                    <div className="flex justify-end space-x-2">
+                      <button
+                        onClick={() => setShowReviewApproveConfirm(false)}
+                        className="px-3.5 py-1.5 rounded-lg bg-white/10 text-slate-300 hover:text-white text-xs font-semibold"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleConfirmReviewApprove}
+                        disabled={reviewSubmitting}
+                        className="px-4 py-1.5 rounded-lg bg-emerald-500 text-black font-extrabold text-xs hover:bg-emerald-400 transition"
+                      >
+                        {reviewSubmitting ? 'Confirming Approval...' : 'Confirm Approval'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Rejection Reason Form */}
+                {showReviewRejectForm && (
+                  <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 space-y-3">
+                    <label className="block text-xs font-bold text-rose-300 uppercase tracking-wider">
+                      Select Rejection Reason
+                    </label>
+                    <select
+                      value={reviewPresetReason}
+                      onChange={e => setReviewPresetReason(e.target.value)}
+                      className="w-full bg-[#141416] border border-rose-500/40 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-400"
+                    >
+                      <option value="Document unreadable">Document unreadable</option>
+                      <option value="Front image missing">Front image missing</option>
+                      <option value="Back image missing">Back image missing</option>
+                      <option value="Licence details inconsistent">Licence details inconsistent</option>
+                      <option value="Expired licence">Expired licence</option>
+                      <option value="Incorrect document">Incorrect document</option>
+                      <option value="Additional review required">Additional review required</option>
+                      <option value="Other / Custom reason">Other / Custom reason</option>
+                    </select>
+
+                    {reviewPresetReason === 'Other / Custom reason' && (
+                      <textarea
+                        rows={2}
+                        placeholder="Specify custom rejection reason..."
+                        value={reviewCustomReason}
+                        onChange={e => setReviewCustomReason(e.target.value)}
+                        className="w-full bg-[#141416] border border-rose-500/40 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-400 resize-none"
+                      />
+                    )}
+
+                    <div className="flex justify-end space-x-2 pt-1">
+                      <button
+                        onClick={() => setShowReviewRejectForm(false)}
+                        className="px-3.5 py-1.5 rounded-lg bg-white/10 text-slate-300 text-xs"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleConfirmReviewReject}
+                        disabled={reviewSubmitting}
+                        className="px-4 py-1.5 rounded-lg bg-rose-500 text-white font-extrabold text-xs hover:bg-rose-600 transition"
+                      >
+                        {reviewSubmitting ? 'Submitting Rejection...' : 'Confirm Rejection'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* 4. Audit History Timeline */}
+              <div className="bg-[#0A0A0B] p-5 rounded-xl border border-white/5 space-y-3">
+                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center space-x-1.5">
+                  <History className="w-3.5 h-3.5 text-[#00E5C7]" />
+                  <span>Audit History Timeline</span>
+                </h3>
+
+                {loadingReviewAudit ? (
+                  <div className="py-4 text-center text-slate-400 text-xs">Loading audit events...</div>
+                ) : reviewAuditEvents.length === 0 ? (
+                  <p className="text-slate-500 text-xs italic">No audit log entries recorded yet.</p>
+                ) : (
+                  <div className="space-y-2 border-l-2 border-white/10 pl-3 ml-1.5">
+                    {reviewAuditEvents.map((evt, idx) => (
+                      <div key={evt.id || idx} className="relative space-y-0.5">
+                        <div className="absolute -left-[17px] top-1 w-2 h-2 rounded-full bg-[#00E5C7]" />
+                        <div className="flex flex-wrap items-center justify-between gap-1 text-[11px]">
+                          <span className="font-bold text-white uppercase">{evt.eventType || evt.action || 'EVENT'}</span>
+                          <span className="font-mono text-slate-400 text-[10px]">
+                            {evt.createdAt ? new Date(evt.createdAt).toLocaleString('en-IN') : (evt.timestamp ? new Date(evt.timestamp).toLocaleString('en-IN') : '')}
+                          </span>
+                        </div>
+                        <p className="text-slate-300 text-[11px]">{evt.notes || evt.reason || 'Status updated'}</p>
+                        {evt.performedBy && (
+                          <p className="text-[10px] text-slate-400 font-mono">By: {evt.performedBy}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Full-Screen Image Zoom Modal */}
+      {reviewZoomImage && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/95 backdrop-blur-lg">
+          <div className="relative max-w-4xl max-h-[90vh] w-full flex flex-col items-center justify-center">
+            <div className="absolute top-2 right-2 flex items-center space-x-2">
+              <span className="text-xs font-bold text-white bg-black/60 px-3 py-1 rounded-lg border border-white/10">
+                {reviewZoomImage.title}
+              </span>
+              <button
+                onClick={() => setReviewZoomImage(null)}
+                className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <img
+              src={reviewZoomImage.url}
+              alt={reviewZoomImage.title}
+              className="max-h-[85vh] max-w-full object-contain rounded-xl shadow-2xl border border-white/10"
+            />
           </div>
         </div>
       )}

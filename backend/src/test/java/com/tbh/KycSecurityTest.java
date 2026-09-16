@@ -417,4 +417,85 @@ public class KycSecurityTest {
         assertNotNull(booking);
         assertEquals(BookingStatus.PENDING, booking.getStatus());
     }
+
+    @Test
+    @DisplayName("20. ROLE_ADMIN approval sets status to TBH_VERIFIED, drivingLicenseVerified=true, and creates audit event")
+    void testAdminApprovalSetsTbhVerifiedAndAuditLog() throws Exception {
+        User applicant = createTestUser("admin_approve_app", false, "987654321099");
+        LicenseVerification kyc = new LicenseVerification(applicant, "KA01••••7777", "KA0120200007777", "KA", LocalDate.now().plusYears(5), KycVerificationStatus.PENDING_ADMIN_REVIEW);
+        kyc.setOcrStatus("OCR_UNAVAILABLE");
+        kyc = kycRepository.save(kyc);
+
+        String adminToken = jwtTokenProvider.generateToken(1L, "admin_review@tbhrentals.in", "ROLE_ADMIN");
+
+        mockMvc.perform(post("/api/admin/kyc/" + kyc.getId() + "/review")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"status\":\"TBH_VERIFIED\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.verificationStatus").value("TBH_VERIFIED"));
+
+        User reloadedUser = userRepository.findById(applicant.getId()).orElseThrow();
+        assertTrue(reloadedUser.isDrivingLicenseVerified());
+
+        LicenseVerification reloadedKyc = kycRepository.findById(kyc.getId()).orElseThrow();
+        assertEquals(KycVerificationStatus.TBH_VERIFIED, reloadedKyc.getVerificationStatus());
+    }
+
+    @Test
+    @DisplayName("21. ROLE_ADMIN rejection requires reason, sets status to REJECTED, drivingLicenseVerified=false, and logs audit event")
+    void testAdminRejectionSetsRejectedWithReasonAndAuditLog() throws Exception {
+        User applicant = createTestUser("admin_reject_app", true, "987654321098");
+        LicenseVerification kyc = new LicenseVerification(applicant, "KA01••••8888", "KA0120200008888", "KA", LocalDate.now().plusYears(5), KycVerificationStatus.PENDING_ADMIN_REVIEW);
+        kyc = kycRepository.save(kyc);
+
+        String adminToken = jwtTokenProvider.generateToken(1L, "admin_review@tbhrentals.in", "ROLE_ADMIN");
+
+        mockMvc.perform(post("/api/admin/kyc/" + kyc.getId() + "/review")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"status\":\"REJECTED\",\"rejectionReason\":\"Expired licence\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.verificationStatus").value("REJECTED"))
+                .andExpect(jsonPath("$.rejectionReason").value("Expired licence"));
+
+        User reloadedUser = userRepository.findById(applicant.getId()).orElseThrow();
+        assertFalse(reloadedUser.isDrivingLicenseVerified());
+
+        LicenseVerification reloadedKyc = kycRepository.findById(kyc.getId()).orElseThrow();
+        assertEquals(KycVerificationStatus.REJECTED, reloadedKyc.getVerificationStatus());
+        assertEquals("Expired licence", reloadedKyc.getRejectionReason());
+    }
+
+    @Test
+    @DisplayName("22. ROLE_ADMIN can retrieve KYC audit history timeline")
+    void testAdminCanRetrieveKycAuditHistory() throws Exception {
+        User applicant = createTestUser("admin_audit_app", false, "987654321097");
+        LicenseVerification kyc = new LicenseVerification(applicant, "KA01••••9999", "KA0120200009999", "KA", LocalDate.now().plusYears(5), KycVerificationStatus.SUBMITTED);
+        kyc = kycRepository.save(kyc);
+
+        String adminToken = jwtTokenProvider.generateToken(1L, "admin_review@tbhrentals.in", "ROLE_ADMIN");
+
+        mockMvc.perform(get("/api/admin/kyc/" + kyc.getId() + "/audit")
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("23. OCR_UNAVAILABLE status does not block manual admin review approval")
+    void testOcrUnavailableDoesNotBlockManualAdminReview() throws Exception {
+        User applicant = createTestUser("ocr_unavail_app", false, "987654321096");
+        LicenseVerification kyc = new LicenseVerification(applicant, "KA01••••6666", "KA0120200006666", "KA", LocalDate.now().plusYears(5), KycVerificationStatus.PENDING_ADMIN_REVIEW);
+        kyc.setOcrStatus("OCR_UNAVAILABLE");
+        kyc = kycRepository.save(kyc);
+
+        String adminToken = jwtTokenProvider.generateToken(1L, "admin_review@tbhrentals.in", "ROLE_ADMIN");
+
+        mockMvc.perform(post("/api/admin/kyc/" + kyc.getId() + "/review")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"status\":\"TBH_VERIFIED\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.verificationStatus").value("TBH_VERIFIED"));
+    }
 }
