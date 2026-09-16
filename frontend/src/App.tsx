@@ -195,7 +195,7 @@ const AppContent: React.FC = () => {
           const fleetSection = document.getElementById('fleet-explorer');
           if (fleetSection) fleetSection.scrollIntoView({ behavior: 'smooth' });
         }}
-        onOpenFirst3D={() => setSelectedGalleryVehicle(vehicles[2] || vehicles[0])} // Opens flagship in multi-angle gallery & 360
+        onOpenFirst3D={() => setSelectedGalleryVehicle(vehicles.find(v => v.name.includes('Bullet 350')) || vehicles[2] || vehicles[0])} // Opens Royal Enfield Bullet 350 (Military Black) in multi-angle gallery & 360
       />
 
       {/* Fleet Explorer Main Content */}

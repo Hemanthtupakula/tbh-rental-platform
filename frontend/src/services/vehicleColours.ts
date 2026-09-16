@@ -42,15 +42,14 @@ export const OEM_VEHICLE_PALETTES: Record<number, OEMVehiclePalette> = {
       { name: 'Pearl Nightstar Black', hex: '#0a0a0a' }
     ]
   },
-  // 3: Suzuki Access 125 - Physical image is Metallic Dark Greenish Blue (Matte Teal/Blue)
+  // 3: Royal Enfield Bullet 350 - Physical image is Military Black
   3: {
-    manufacturer: 'Suzuki Motorcycle India',
+    manufacturer: 'Royal Enfield',
     colours: [
-      { name: 'Metallic Dark Greenish Blue', hex: '#2f4c6b', isPhotographed: true },
-      { name: 'Solid Ice Green', hex: '#0d9488' },
-      { name: 'Metallic Matte Black', hex: '#18181b' },
-      { name: 'Pearl Mirage White', hex: '#fafafa' },
-      { name: 'Metallic Matte Platinum Silver', hex: '#9ca3af' }
+      { name: 'Military Black', hex: '#0a0a0a', isPhotographed: true },
+      { name: 'Black Gold', hex: '#1c1917' },
+      { name: 'Standard Maroon', hex: '#881337' },
+      { name: 'Military Red', hex: '#b91c1c' }
     ]
   },
   // 4: TVS Jupiter 125 - Physical image is Dawn Orange (Copper/Orange Bronze)
@@ -154,14 +153,15 @@ export const OEM_VEHICLE_PALETTES: Record<number, OEMVehiclePalette> = {
       { name: 'Dapper Grey', hex: '#94a3b8' }
     ]
   },
-  // 14: Royal Enfield Bullet 350 - Physical image is Black Gold (Black with gold pinstripes)
+  // 14: Suzuki Access 125 - Physical image is Metallic Dark Greenish Blue (Matte Teal/Blue)
   14: {
-    manufacturer: 'Royal Enfield',
+    manufacturer: 'Suzuki Motorcycle India',
     colours: [
-      { name: 'Black Gold', hex: '#1c1917', isPhotographed: true },
-      { name: 'Military Black', hex: '#0a0a0a' },
-      { name: 'Standard Maroon', hex: '#881337' },
-      { name: 'Military Red', hex: '#b91c1c' }
+      { name: 'Metallic Dark Greenish Blue', hex: '#2f4c6b', isPhotographed: true },
+      { name: 'Solid Ice Green', hex: '#0d9488' },
+      { name: 'Metallic Matte Black', hex: '#18181b' },
+      { name: 'Pearl Mirage White', hex: '#fafafa' },
+      { name: 'Metallic Matte Platinum Silver', hex: '#9ca3af' }
     ]
   },
   // 15: Royal Enfield Meteor 350 - Physical image is Fireball Yellow (Yellow tank with yellow rim stripes)
