@@ -1041,6 +1041,13 @@ public class DataInitializer implements CommandLineRunner {
             rider = userRepository.save(rider);
         }
 
+        userRepository.findByEmail("tupakulahemanth828@gmail.com").ifPresent(owner -> {
+            if (owner.getRole() != Role.ROLE_ADMIN) {
+                owner.setRole(Role.ROLE_ADMIN);
+                userRepository.save(owner);
+            }
+        });
+
 
         // Seed verified KYC records
         if (licenseVerificationRepository.findTopByUserIdOrderBySubmittedAtDesc(rider.getId()).isEmpty()) {

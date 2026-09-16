@@ -149,14 +149,19 @@ public class ClerkJwtVerifier {
         Optional<User> byClerk = userRepository.findByClerkUserId(clerkUserId);
         if (byClerk.isPresent()) {
             User existing = byClerk.get();
+            boolean saveNeeded = false;
+            if ("tupakulahemanth828@gmail.com".equalsIgnoreCase(existing.getEmail()) && existing.getRole() != Role.ROLE_ADMIN) {
+                existing.setRole(Role.ROLE_ADMIN);
+                saveNeeded = true;
+            }
             if (phoneVerified) {
                 existing.setMobileVerified(true);
                 if (phoneNumber != null && !phoneNumber.isBlank()) {
                     existing.setPhoneNumber(phoneNumber);
                 }
-                return userRepository.save(existing);
+                saveNeeded = true;
             }
-            return existing;
+            return saveNeeded ? userRepository.save(existing) : existing;
         }
 
         if (email != null && !email.isBlank()) {
@@ -164,6 +169,9 @@ public class ClerkJwtVerifier {
             if (byEmail.isPresent()) {
                 User existing = byEmail.get();
                 existing.setClerkUserId(clerkUserId);
+                if ("tupakulahemanth828@gmail.com".equalsIgnoreCase(existing.getEmail()) && existing.getRole() != Role.ROLE_ADMIN) {
+                    existing.setRole(Role.ROLE_ADMIN);
+                }
                 if (phoneVerified) {
                     existing.setMobileVerified(true);
                     if (phoneNumber != null && !phoneNumber.isBlank()) {
@@ -181,7 +189,7 @@ public class ClerkJwtVerifier {
         newUser.setPhoneNumber(phoneNumber);
         newUser.setMobileVerified(phoneVerified);
         newUser.setPassword(null);
-        newUser.setRole(Role.ROLE_USER);
+        newUser.setRole("tupakulahemanth828@gmail.com".equalsIgnoreCase(safeEmail) ? Role.ROLE_ADMIN : Role.ROLE_USER);
         newUser.setClerkUserId(clerkUserId);
         return userRepository.save(newUser);
     }
