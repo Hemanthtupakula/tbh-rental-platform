@@ -350,6 +350,10 @@ public class AuthService {
 
     private String sanitizePhone(String phone) {
         if (phone == null) return "";
-        return phone.replaceAll("[^0-9]", "");
+        String digits = phone.replaceAll("[^0-9]", "");
+        if (digits.length() > 10) {
+            return digits.substring(digits.length() - 10);
+        }
+        return digits;
     }
 }
