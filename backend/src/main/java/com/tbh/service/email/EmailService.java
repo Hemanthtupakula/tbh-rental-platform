@@ -265,4 +265,61 @@ public class EmailService {
             outboxService.queueEvent("RENTAL_COMPLETED", email, customerName, "rental_completed", payload, "notif_rent_comp_" + bookingRef);
         }
     }
+
+    public void queueRentalPassIssued(String email, String customerName, String maskedAadhaar,
+                                      String phoneNumber, String dlStatus, String bookingRef,
+                                      String vehicleName, String registrationNumber,
+                                      String pickupHub, String dropHub,
+                                      String totalAmount, String unlockPin) {
+        if (outboxService != null) {
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("customerName", customerName != null ? customerName : "Rider");
+            payload.put("maskedAadhaar", maskedAadhaar != null ? maskedAadhaar : "•••• •••• XXXX");
+            payload.put("phoneNumber", phoneNumber != null ? phoneNumber : "+91 ••••• •••••");
+            payload.put("dlStatus", dlStatus != null ? dlStatus : "Verified DL on File");
+            payload.put("bookingReference", bookingRef != null ? bookingRef : "");
+            payload.put("vehicleName", vehicleName != null ? vehicleName : "TBH Vehicle");
+            payload.put("registrationNumber", registrationNumber != null ? registrationNumber : "Fleet Unit");
+            payload.put("pickupHub", pickupHub != null ? pickupHub : "Hub");
+            payload.put("dropHub", dropHub != null ? dropHub : "Hub");
+            payload.put("totalAmount", totalAmount != null ? totalAmount : "0.00");
+            payload.put("unlockPin", unlockPin != null ? unlockPin : "----");
+            outboxService.queueEvent("RENTAL_PASS_ISSUED", email, customerName, "rental_pass_issued", payload, "notif_pass_iss_" + bookingRef);
+        }
+    }
+
+    public void queueMobileVerificationCompleted(String email, String customerName) {
+        if (outboxService != null) {
+            Map<String, Object> payload = Map.of("customerName", customerName != null ? customerName : "Rider");
+            outboxService.queueEvent("MOBILE_VERIFICATION_COMPLETED", email, customerName, "mobile_verification", payload, "notif_mob_ver_" + email + "_" + System.currentTimeMillis());
+        }
+    }
+
+    public void queueProfileUpdated(String email, String customerName) {
+        if (outboxService != null) {
+            Map<String, Object> payload = Map.of("customerName", customerName != null ? customerName : "Rider");
+            outboxService.queueEvent("PROFILE_UPDATED", email, customerName, "profile_updated", payload, "notif_prof_upd_" + email + "_" + System.currentTimeMillis());
+        }
+    }
+
+    public void queueSupportTicketCreated(String email, String customerName, String ticketNumber, String subject) {
+        if (outboxService != null) {
+            Map<String, Object> payload = Map.of(
+                    "customerName", customerName != null ? customerName : "Rider",
+                    "ticketNumber", ticketNumber != null ? ticketNumber : "",
+                    "subject", subject != null ? subject : ""
+            );
+            outboxService.queueEvent("SUPPORT_TICKET_CREATED", email, customerName, "support_ticket_created", payload, "notif_sup_cr_" + ticketNumber);
+        }
+    }
+
+    public void queueSupportTicketResolved(String email, String customerName, String ticketNumber) {
+        if (outboxService != null) {
+            Map<String, Object> payload = Map.of(
+                    "customerName", customerName != null ? customerName : "Rider",
+                    "ticketNumber", ticketNumber != null ? ticketNumber : ""
+            );
+            outboxService.queueEvent("SUPPORT_TICKET_RESOLVED", email, customerName, "support_ticket_resolved", payload, "notif_sup_res_" + ticketNumber);
+        }
+    }
 }

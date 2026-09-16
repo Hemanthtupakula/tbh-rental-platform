@@ -1,7 +1,12 @@
 import React from 'react';
-import { Phone, Mail, MapPin, ShieldCheck, Heart } from 'lucide-react';
+import { Phone, ShieldCheck, Heart } from 'lucide-react';
+import { InfoModalType } from './InfoModals';
 
-export const Footer: React.FC = () => {
+interface FooterProps {
+  onOpenInfoModal?: (modal: InfoModalType) => void;
+}
+
+export const Footer: React.FC<FooterProps> = ({ onOpenInfoModal }) => {
   return (
     <footer className="w-full bg-[#0A0A0B] border-t border-white/10 pt-16 pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
@@ -18,9 +23,12 @@ export const Footer: React.FC = () => {
               />
             </div>
             <p className="text-xs text-slate-400 leading-relaxed">
-              India's foremost luxury bike and car rental platform. Seamless 3D vehicle visualization, transparent hourly INR rates, and pan-India airport hubs.
+              India's foremost luxury bike and car rental platform. Transparent hourly rates in ₹ INR, instant keyless unlock PINs, and hubs at major Indian airports.
             </p>
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-lg bg-white/5 border border-white/10 text-xs text-slate-300">
+            <div 
+              onClick={() => onOpenInfoModal && onOpenInfoModal('CONTACT')}
+              className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 hover:border-[#00E5C7]/40 text-xs text-slate-300 cursor-pointer transition"
+            >
               <Phone className="w-3.5 h-3.5 text-[#00E5C7]" />
               <span>SOS Helpline: <strong>1800-TBH-RIDE</strong></span>
             </div>
@@ -60,28 +68,55 @@ export const Footer: React.FC = () => {
             <div className="p-3 rounded-xl bg-[#141416] border border-white/10 space-y-1.5 text-xs text-slate-300">
               <div className="flex items-center space-x-2">
                 <ShieldCheck className="w-4 h-4 text-[#00E5C7]" />
-                <span className="font-semibold">Parivahan Approved</span>
+                <span className="font-semibold">Parivahan Commercial Fleet</span>
               </div>
-              <p className="text-[11px] text-slate-400">All self-drive vehicles registered with commercial yellow plates and comprehensive insurance.</p>
+              <p className="text-[11px] text-slate-400">All self-drive vehicles are registered with commercial yellow plates and comprehensive insurance under the Motor Vehicles Act.</p>
             </div>
             <p className="text-[10px] text-slate-500">
-              Protected by Razorpay 256-Bit SSL Payment Shield.
+              Protected by Razorpay 256-Bit SSL Payment Shield & Resend outbox queues.
             </p>
           </div>
 
         </div>
 
-        {/* Bottom copyright */}
-        <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+        {/* Bottom copyright & Info Modal links */}
+        <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-4">
           <p>© 2026 TBH Mobility Technologies Pvt. Ltd. All rights reserved.</p>
-          <div className="flex items-center space-x-4">
-            <span className="hover:text-slate-400 cursor-pointer">Rental Terms</span>
-            <span className="hover:text-slate-400 cursor-pointer">Damage Policy</span>
-            <span className="hover:text-slate-400 cursor-pointer">Privacy</span>
-            <span className="text-[#00E5C7] flex items-center space-x-1">
-              <span>Made with pride in India</span>
-              <Heart className="w-3 h-3 fill-[#00E5C7]" />
-            </span>
+          
+          <div className="flex flex-wrap items-center gap-4 text-xs">
+            <button 
+              onClick={() => onOpenInfoModal && onOpenInfoModal('TERMS')}
+              className="hover:text-[#00E5C7] transition"
+            >
+              Rental Terms
+            </button>
+            <button 
+              onClick={() => onOpenInfoModal && onOpenInfoModal('DAMAGE')}
+              className="hover:text-[#00E5C7] transition"
+            >
+              Damage Policy
+            </button>
+            <button 
+              onClick={() => onOpenInfoModal && onOpenInfoModal('PRIVACY')}
+              className="hover:text-[#00E5C7] transition"
+            >
+              Privacy
+            </button>
+            <button 
+              onClick={() => onOpenInfoModal && onOpenInfoModal('CONTACT')}
+              className="hover:text-[#00E5C7] transition"
+            >
+              Contact / Support
+            </button>
+            <button 
+              onClick={() => onOpenInfoModal && onOpenInfoModal('ABOUT')}
+              className="hover:text-[#00E5C7] transition"
+            >
+              About TBH
+            </button>
+            <div className="text-[#00E5C7] font-bold tracking-wider flex items-center space-x-1 pl-2 border-l border-white/15">
+              <span>BUILT FOR INDIA'S ROADS.</span>
+            </div>
           </div>
         </div>
 

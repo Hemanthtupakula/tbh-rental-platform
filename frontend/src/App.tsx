@@ -24,6 +24,7 @@ import { AdminRoute } from './components/AdminRoute';
 import { AdminDashboard } from './components/AdminDashboard';
 import { ConciergeChatModal } from './components/ConciergeChatModal';
 import { Footer } from './components/Footer';
+import { InfoModals, InfoModalType } from './components/InfoModals';
 import { api, INITIAL_CITIES, INITIAL_VEHICLES } from './services/api';
 import { Vehicle, City, Booking, VehicleCategory } from './types';
 import { AuthProvider } from './context/AuthContext';
@@ -55,6 +56,7 @@ const AppContent: React.FC = () => {
   const [isKycOpen, setIsKycOpen] = useState<boolean>(false);
   const [isBookingsOpen, setIsBookingsOpen] = useState<boolean>(false);
   const [isAdminOpen, setIsAdminOpen] = useState<boolean>(false);
+  const [infoModal, setInfoModal] = useState<InfoModalType>(null);
   const [wishlist, setWishlist] = useState<number[]>([]);
   const [currentPath, setCurrentPath] = useState<string>(() => window.location.pathname);
 
@@ -326,6 +328,7 @@ const AppContent: React.FC = () => {
                 key={vehicle.id}
                 vehicle={vehicle}
                 durationMode={durationMode}
+                selectedCity={selectedCity}
                 onOpen3D={(v) => setSelectedGalleryVehicle(v)}
                 onOpenGallery={(v) => setSelectedGalleryVehicle(v)}
                 onQuickBook={(v) => setSelectedBookingVehicle(v)}
@@ -344,7 +347,10 @@ const AppContent: React.FC = () => {
       <ConciergeChatModal />
 
       {/* Footer */}
-      <Footer />
+      <Footer onOpenInfoModal={(m) => setInfoModal(m)} />
+
+      {/* Info Modals */}
+      <InfoModals activeModal={infoModal} onClose={() => setInfoModal(null)} />
 
       {/* Modals */}
       {selectedGalleryVehicle && (

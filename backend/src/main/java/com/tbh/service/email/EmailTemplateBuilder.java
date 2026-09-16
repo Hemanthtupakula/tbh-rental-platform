@@ -1,27 +1,29 @@
 package com.tbh.service.email;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 
 @Component
 public class EmailTemplateBuilder {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
     public String buildSubject(String eventType, JsonNode payload) {
         return switch (eventType) {
             case "BOOKING_CONFIRMED" -> "Ride Confirmed: " + payload.path("vehicleName").asText("Your Vehicle") + " (Ref: " + payload.path("bookingReference").asText() + ")";
             case "PAYMENT_SUCCESS" -> "Payment Verified: ₹" + payload.path("amount").asText("0.00") + " for TBH Rental";
+            case "RENTAL_PASS_ISSUED" -> "Digital Rental Pass Issued: " + payload.path("bookingReference").asText() + " (" + payload.path("vehicleName").asText("Vehicle") + ")";
             case "PAYMENT_FAILED" -> "Action Required: Payment Failed for Booking " + payload.path("bookingReference").asText();
             case "BOOKING_CANCELLED" -> "Booking Cancelled: " + payload.path("bookingReference").asText();
             case "KYC_SUBMITTED" -> "KYC Verification Documents Under Review";
             case "KYC_APPROVED" -> "KYC Verified! Your TBH Access is Activated";
             case "KYC_REJECTED" -> "Action Required: KYC Verification Update Needed";
-            case "SECURITY_DEPOSIT_REFUNDED" -> "Security Deposit Refund Initiated: ₹" + payload.path("amount").asText("0.00");
+            case "SECURITY_DEPOSIT_REFUNDED", "REFUND_PROCESSED" -> "Security Deposit Refund Initiated: ₹" + payload.path("amount").asText("0.00");
             case "RENTAL_REMINDER_PICKUP" -> "Reminder: Your TBH Rental Starts Soon";
             case "RENTAL_COMPLETED" -> "Trip Completed! Thank you for riding with TBH";
+            case "SUPPORT_TICKET_CREATED" -> "Support Ticket Received: #" + payload.path("ticketNumber").asText() + " - " + payload.path("subject").asText("Inquiry");
             case "SUPPORT_REPLY" -> "Support Update: Ticket #" + payload.path("ticketNumber").asText() + " - " + payload.path("subject").asText("Inquiry");
+            case "SUPPORT_TICKET_RESOLVED" -> "Support Ticket Resolved: #" + payload.path("ticketNumber").asText();
+            case "MOBILE_VERIFICATION_COMPLETED" -> "Mobile Verification Completed — TBH Rentals";
+            case "PROFILE_UPDATED" -> "Security Notice: TBH Profile Updated";
             default -> "TBH Rentals Notification: " + eventType;
         };
     }
@@ -40,7 +42,7 @@ public class EmailTemplateBuilder {
             .row:last-child { border-bottom: none; }
             .label { color: #9ca3af; }
             .value { font-weight: 600; color: #00E5C7; }
-            .pin-badge { font-size: 24px; font-weight: 800; color: #D4AF37; letter-spacing: 4px; text-align: center; padding: 12px; background: #232733; border-radius: 6px; margin: 16px 0; }
+            .pin-badge { font-size: 24px; font-weight: 800; color: #D4AF37; letter-spacing: 4px; text-align: center; padding: 12px; background: #232733; border-radius: 6px; margin: 16px 0; border: 1px solid rgba(212,175,55,0.3); }
             .footer { padding: 24px; text-align: center; font-size: 12px; color: #6b7280; border-top: 1px solid #232733; }
         """;
 
@@ -82,6 +84,38 @@ public class EmailTemplateBuilder {
                 payload.path("bookingReference").asText("TBH-REF"),
                 payload.path("amount").asText("0.00"),
                 payload.path("paymentMethod").asText("Online")
+            );
+
+            case "RENTAL_PASS_ISSUED" -> """
+                <h2 class="title" style="color: #00E5C7;">Digital Rental Pass Issued</h2>
+                <p>Hello %s, your official Digital Rental Pass is generated and ready for pickup.</p>
+                <div class="card">
+                    <div class="row"><span class="label">Rider Name</span><span class="value">%s</span></div>
+                    <div class="row"><span class="label">Masked Aadhaar</span><span class="value">%s</span></div>
+                    <div class="row"><span class="label">Verified Mobile</span><span class="value">%s</span></div>
+                    <div class="row"><span class="label">Driving Licence</span><span class="value">%s</span></div>
+                    <div class="row"><span class="label">Booking Reference</span><span class="value">%s</span></div>
+                    <div class="row"><span class="label">Vehicle</span><span class="value">%s</span></div>
+                    <div class="row"><span class="label">Registration</span><span class="value">%s</span></div>
+                    <div class="row"><span class="label">Pickup Hub</span><span class="value">%s</span></div>
+                    <div class="row"><span class="label">Drop Hub</span><span class="value">%s</span></div>
+                    <div class="row"><span class="label">Total Paid</span><span class="value">₹%s</span></div>
+                </div>
+                <p style="margin-top: 20px; text-align: center;">Keyless Unlock PIN:</p>
+                <div class="pin-badge">%s</div>
+            """.formatted(
+                payload.path("customerName").asText("Rider"),
+                payload.path("customerName").asText("Rider"),
+                payload.path("maskedAadhaar").asText("•••• •••• XXXX"),
+                payload.path("phoneNumber").asText("+91 ••••• •••••"),
+                payload.path("dlStatus").asText("Verified DL on File"),
+                payload.path("bookingReference").asText("TBH-REF"),
+                payload.path("vehicleName").asText("TBH Vehicle"),
+                payload.path("registrationNumber").asText("Fleet Unit Assigned"),
+                payload.path("pickupHub").asText("Designated Hub"),
+                payload.path("dropHub").asText("Designated Hub"),
+                payload.path("totalAmount").asText("0.00"),
+                payload.path("unlockPin").asText("----")
             );
 
             case "PAYMENT_FAILED" -> """
@@ -130,9 +164,9 @@ public class EmailTemplateBuilder {
                 <p>Please login and submit a clear image of your Driving License.</p>
             """.formatted(payload.path("rejectionReason").asText("Document unreadable or invalid format"));
 
-            case "SECURITY_DEPOSIT_REFUNDED" -> """
-                <h2 class="title">Security Deposit Refund Initiated</h2>
-                <p>Your vehicle return inspection has passed with 0 penalty deductions.</p>
+            case "SECURITY_DEPOSIT_REFUNDED", "REFUND_PROCESSED" -> """
+                <h2 class="title">Refund Processed</h2>
+                <p>Your refund transaction has been initiated by our billing department.</p>
                 <div class="card">
                     <div class="row"><span class="label">Refund Amount</span><span class="value">₹%s</span></div>
                     <div class="row"><span class="label">Transaction Ref</span><span class="value">%s</span></div>
@@ -144,7 +178,7 @@ public class EmailTemplateBuilder {
             );
 
             case "RENTAL_REMINDER_PICKUP" -> """
-                <h2 class="title">Pickup Reminder: 2 Hours Remaining</h2>
+                <h2 class="title">Pickup Reminder: Your Ride Starts Soon</h2>
                 <p>Your vehicle is serviced, sanitized, and awaiting you at <strong>%s</strong>.</p>
                 <div class="pin-badge">%s</div>
                 <p>Show this PIN at arrival to collect your keys.</p>
@@ -158,6 +192,20 @@ public class EmailTemplateBuilder {
                 <p>Thank you for riding with TBH Rentals. We hope you enjoyed your ride beyond limits!</p>
                 <p>Leave a review on our app to share your experience with fellow riders.</p>
             """;
+
+            case "SUPPORT_TICKET_CREATED" -> """
+                <h2 class="title">Support Ticket Received</h2>
+                <p>Hello %s, we have received your support request.</p>
+                <div class="card">
+                    <div class="row"><span class="label">Ticket #</span><span class="value">%s</span></div>
+                    <div class="row"><span class="label">Subject</span><span class="value">%s</span></div>
+                </div>
+                <p>Our concierge support team will inspect your issue and respond shortly.</p>
+            """.formatted(
+                payload.path("customerName").asText("Rider"),
+                payload.path("ticketNumber").asText(""),
+                payload.path("subject").asText("")
+            );
 
             case "SUPPORT_REPLY" -> """
                 <h2 class="title">Support Team Update</h2>
@@ -177,6 +225,31 @@ public class EmailTemplateBuilder {
                 payload.path("subject").asText(""),
                 payload.path("status").asText("IN_PROGRESS"),
                 payload.path("message").asText("")
+            );
+
+            case "SUPPORT_TICKET_RESOLVED" -> """
+                <h2 class="title" style="color: #00E5C7;">Support Ticket Resolved</h2>
+                <p>Hello %s, your support ticket #%s has been marked as resolved.</p>
+                <p>If you need further assistance, you can reopen the ticket or create a new request at any time.</p>
+            """.formatted(
+                payload.path("customerName").asText("Rider"),
+                payload.path("ticketNumber").asText("")
+            );
+
+            case "MOBILE_VERIFICATION_COMPLETED" -> """
+                <h2 class="title" style="color: #00E5C7;">Mobile Verification Verified</h2>
+                <p>Hello %s, your mobile number has been verified via Wakit WhatsApp OTP.</p>
+                <p>Your verified phone number is now linked to your TBH account profile.</p>
+            """.formatted(
+                payload.path("customerName").asText("Rider")
+            );
+
+            case "PROFILE_UPDATED" -> """
+                <h2 class="title">Profile Updated</h2>
+                <p>Hello %s, your profile information was updated successfully.</p>
+                <p>If you did not authorize this change, please contact our security team immediately.</p>
+            """.formatted(
+                payload.path("customerName").asText("Rider")
             );
 
             default -> "<p>" + eventType + "</p>";

@@ -238,6 +238,22 @@ public class PaymentController {
                         savedBooking.getDropHub() != null ? savedBooking.getDropHub() : "Designated Hub",
                         String.valueOf(savedBooking.getTotalAmount()), savedBooking.getUnlockPin()
                 );
+                String rawAadhaar = savedBooking.getUser().getAadhaarNumber();
+                String maskedAadhaar = (rawAadhaar != null && rawAadhaar.length() >= 4)
+                        ? "•••• •••• " + rawAadhaar.substring(rawAadhaar.length() - 4)
+                        : "•••• •••• XXXX";
+                emailService.queueRentalPassIssued(
+                        email, name,
+                        maskedAadhaar,
+                        savedBooking.getUser().getPhoneNumber(),
+                        savedBooking.getUser().isDrivingLicenseVerified() ? "Verified DL on File" : "DL Pending",
+                        savedBooking.getBookingReference(),
+                        savedBooking.getVehicle() != null ? savedBooking.getVehicle().getName() : "TBH Vehicle",
+                        savedBooking.getFleetUnit() != null ? savedBooking.getFleetUnit().getRegistrationNumber() : "Fleet Unit Assigned",
+                        savedBooking.getPickupHub() != null ? savedBooking.getPickupHub() : "Designated Hub",
+                        savedBooking.getDropHub() != null ? savedBooking.getDropHub() : "Designated Hub",
+                        String.valueOf(savedBooking.getTotalAmount()), savedBooking.getUnlockPin()
+                );
             } catch (Exception e) {
                 log.error("[TBH NOTIFICATION] Failed to queue booking/payment confirmation email: {}", e.getMessage());
             }

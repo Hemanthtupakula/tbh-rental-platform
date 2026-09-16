@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ResendConfig {
 
-    @Value("${tbh.email.provider:mock}")
+    @Value("${tbh.email.provider:resend}")
     private String provider;
 
     @Value("${tbh.email.api-key:}")
