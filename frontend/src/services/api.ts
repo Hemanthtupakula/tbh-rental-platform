@@ -2668,7 +2668,10 @@ export const INITIAL_VEHICLES: Vehicle[] = [
   },
 ];
 
-export const API_BASE = (((import.meta as any).env?.VITE_API_BASE_URL as string | undefined) || '').replace(/\/+$/, '') + '/api';
+export const API_BASE = (
+  ((import.meta as any).env?.VITE_API_BASE_URL as string | undefined) || 
+  'https://tbh-rental-platform.onrender.com'
+).replace(/\/+$/, '') + '/api';
 
 export class ApiError extends Error {
   status: number;
