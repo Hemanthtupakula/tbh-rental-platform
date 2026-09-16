@@ -102,4 +102,45 @@ public class ClerkService {
         }
         return user.isMobileVerified();
     }
+
+    /**
+     * Authoritatively fetches the user's primary email address from Clerk REST API.
+     */
+    public String fetchUserPrimaryEmail(String clerkUserId) {
+        if (clerkUserId == null || clerkUserId.isBlank()) return null;
+        String secretKey = clerkConfig.getSecretKey();
+        if (secretKey == null || secretKey.isBlank()) return null;
+
+        try {
+            HttpRequest req = HttpRequest.newBuilder()
+                    .uri(URI.create("https://api.clerk.com/v1/users/" + clerkUserId))
+                    .header("Authorization", "Bearer " + secretKey)
+                    .header("Accept", "application/json")
+                    .timeout(Duration.ofSeconds(5))
+                    .GET()
+                    .build();
+
+            HttpResponse<String> resp = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+            if (resp.statusCode() == 200) {
+                JsonNode root = objectMapper.readTree(resp.body());
+                String primaryEmailId = root.path("primary_email_address_id").asText(null);
+                JsonNode emailAddresses = root.path("email_addresses");
+                if (emailAddresses.isArray()) {
+                    for (JsonNode ea : emailAddresses) {
+                        String id = ea.path("id").asText("");
+                        String email = ea.path("email_address").asText(null);
+                        if (primaryEmailId != null && primaryEmailId.equals(id)) {
+                            return email;
+                        }
+                        if (email != null && !email.isBlank()) {
+                            return email;
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.warn("[CLERK SERVICE] Could not fetch primary email for {}: {}", clerkUserId, e.getMessage());
+        }
+        return null;
+    }
 }

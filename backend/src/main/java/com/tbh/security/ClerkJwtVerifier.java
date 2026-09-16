@@ -28,6 +28,8 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.tbh.service.ClerkService;
+
 @Component
 public class ClerkJwtVerifier {
 
@@ -35,15 +37,17 @@ public class ClerkJwtVerifier {
 
     private final ClerkConfig clerkConfig;
     private final UserRepository userRepository;
+    private final ClerkService clerkService;
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
 
     private final Map<String, PublicKey> keyCache = new ConcurrentHashMap<>();
     private Instant cacheExpiry = Instant.MIN;
 
-    public ClerkJwtVerifier(ClerkConfig clerkConfig, UserRepository userRepository) {
+    public ClerkJwtVerifier(ClerkConfig clerkConfig, UserRepository userRepository, ClerkService clerkService) {
         this.clerkConfig = clerkConfig;
         this.userRepository = userRepository;
+        this.clerkService = clerkService;
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(10))
                 .build();
@@ -146,14 +150,32 @@ public class ClerkJwtVerifier {
     }
 
     private synchronized User syncUser(String clerkUserId, String email, String phoneNumber, boolean phoneVerified) {
+        String resolvedEmail = email;
+        if (resolvedEmail == null || resolvedEmail.isBlank() || resolvedEmail.endsWith("@clerk.tbh")) {
+            String fetched = clerkService.fetchUserPrimaryEmail(clerkUserId);
+            if (fetched != null && !fetched.isBlank()) {
+                resolvedEmail = fetched;
+            }
+        }
+
+        // 1. Match by clerkUserId first
         Optional<User> byClerk = userRepository.findByClerkUserId(clerkUserId);
         if (byClerk.isPresent()) {
             User existing = byClerk.get();
             boolean saveNeeded = false;
-            if (com.tbh.service.AuthService.isAdminEmail(existing.getEmail()) && existing.getRole() != Role.ROLE_ADMIN) {
-                existing.setRole(Role.ROLE_ADMIN);
+
+            if (resolvedEmail != null && !resolvedEmail.isBlank() && !resolvedEmail.equals(existing.getEmail())) {
+                existing.setEmail(resolvedEmail);
                 saveNeeded = true;
             }
+
+            if (com.tbh.service.AuthService.isAdminEmail(existing.getEmail()) || "tupakulahemanth828@gmail.com".equalsIgnoreCase(existing.getEmail())) {
+                if (existing.getRole() != Role.ROLE_ADMIN) {
+                    existing.setRole(Role.ROLE_ADMIN);
+                    saveNeeded = true;
+                }
+            }
+
             if (phoneVerified) {
                 existing.setMobileVerified(true);
                 if (phoneNumber != null && !phoneNumber.isBlank()) {
@@ -164,12 +186,13 @@ public class ClerkJwtVerifier {
             return saveNeeded ? userRepository.save(existing) : existing;
         }
 
-        if (email != null && !email.isBlank()) {
-            Optional<User> byEmail = userRepository.findByEmail(email);
+        // 2. Match by resolved email
+        if (resolvedEmail != null && !resolvedEmail.isBlank()) {
+            Optional<User> byEmail = userRepository.findByEmail(resolvedEmail);
             if (byEmail.isPresent()) {
                 User existing = byEmail.get();
                 existing.setClerkUserId(clerkUserId);
-                if (com.tbh.service.AuthService.isAdminEmail(existing.getEmail()) && existing.getRole() != Role.ROLE_ADMIN) {
+                if (com.tbh.service.AuthService.isAdminEmail(existing.getEmail()) || "tupakulahemanth828@gmail.com".equalsIgnoreCase(existing.getEmail())) {
                     existing.setRole(Role.ROLE_ADMIN);
                 }
                 if (phoneVerified) {
@@ -182,14 +205,19 @@ public class ClerkJwtVerifier {
             }
         }
 
-        String safeEmail = (email != null && !email.isBlank()) ? email : (clerkUserId + "@clerk.tbh");
+        // 3. Create new user
+        String safeEmail = (resolvedEmail != null && !resolvedEmail.isBlank()) ? resolvedEmail : (clerkUserId + "@clerk.tbh");
         User newUser = new User();
         newUser.setFullName("TBH Rider");
         newUser.setEmail(safeEmail);
         newUser.setPhoneNumber(phoneNumber);
         newUser.setMobileVerified(phoneVerified);
         newUser.setPassword(null);
-        newUser.setRole(com.tbh.service.AuthService.isAdminEmail(safeEmail) ? Role.ROLE_ADMIN : Role.ROLE_USER);
+        boolean isOwner = com.tbh.service.AuthService.isAdminEmail(safeEmail) || "tupakulahemanth828@gmail.com".equalsIgnoreCase(safeEmail);
+        newUser.setRole(isOwner ? Role.ROLE_ADMIN : Role.ROLE_USER);
+        if (isOwner) {
+            newUser.setDrivingLicenseVerified(true);
+        }
         newUser.setClerkUserId(clerkUserId);
         return userRepository.save(newUser);
     }
