@@ -204,7 +204,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           )}
 
           {/* Auth Button or User Menu */}
-          {isClerkSignedIn && (isTbhUserLoading || (!user && !tbhUserError)) ? (
+          {isClerkSignedIn && isTbhUserLoading ? (
             <div className="flex items-center space-x-2 px-3.5 py-2 rounded-xl bg-[#141416] border border-[#00E5C7]/40 text-xs text-slate-300 animate-pulse">
               <RefreshCw className="w-3.5 h-3.5 text-[#00E5C7] animate-spin" />
               <span className="font-semibold text-white">Syncing Profile...</span>
@@ -216,9 +216,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               title="Click to retry backend rider profile synchronization"
             >
               <AlertCircle className="w-3.5 h-3.5" />
-              <span>Retry Profile Sync</span>
+              <span>Retry Sync</span>
             </button>
           ) : isClerkSignedIn && user ? (
+
             <div className="relative">
               <button 
                 onClick={() => setShowUserDropdown(!showUserDropdown)}

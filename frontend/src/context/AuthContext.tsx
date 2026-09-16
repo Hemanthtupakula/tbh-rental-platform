@@ -79,13 +79,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
             setUser(syncedUser);
             sessionStorage.setItem('tbh_user', JSON.stringify(syncedUser));
+            setTbhUserError(null);
           } else {
-            setTbhUserError("Unable to synchronize rider profile with server.");
+            // syncClerkUserWithBackend returned null — backend unreachable or returned non-200
+            // Always set an error so Navbar exits the spinner and shows Retry
+            setTbhUserError('Unable to sync rider profile. Tap retry to reconnect.');
           }
+        } else {
+          setTbhUserError('Could not obtain Clerk session token.');
         }
       } catch (err: any) {
         console.error('[CLERK AUTH] Failed to sync session with TBH backend:', err);
-        setTbhUserError(err?.message || "Profile synchronization error.");
+        setTbhUserError(err?.message || 'Profile synchronization error.');
       } finally {
         setIsTbhUserLoading(false);
         syncInProgressRef.current = false;
@@ -99,6 +104,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.removeItem('tbh_token');
     }
   };
+
 
   useEffect(() => {
     syncWithBackend();

@@ -46,6 +46,14 @@ public class ClerkAuthController {
             if (user.getClerkUserId() != null && !user.getClerkUserId().isBlank()) {
                 clerkService.syncUserMobileVerification(user);
             }
+
+            // Auto-elevate platform owner to ROLE_ADMIN on every sync (idempotent)
+            if ("tupakulahemanth828@gmail.com".equalsIgnoreCase(user.getEmail())
+                    && user.getRole() != com.tbh.entity.Role.ROLE_ADMIN) {
+                user.setRole(com.tbh.entity.Role.ROLE_ADMIN);
+                userRepository.save(user);
+            }
+
             resp.put("id", user.getId());
             resp.put("fullName", user.getFullName());
             resp.put("phoneNumber", user.getPhoneNumber());
