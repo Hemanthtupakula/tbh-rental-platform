@@ -132,7 +132,7 @@ export const VehicleGalleryModal: React.FC<VehicleGalleryModalProps> = ({
                 </span>
                 <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[9px] font-bold flex items-center space-x-1">
                   <ShieldCheck className="w-3 h-3 inline mr-1" />
-                  Indian-Market Specification • Reference Checked
+                  Indian-Market Specification • Verified Fleet Unit
                 </span>
               </div>
               <h3 className="text-xl font-extrabold text-white font-display">
