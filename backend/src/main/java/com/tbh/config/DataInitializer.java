@@ -1041,10 +1041,13 @@ public class DataInitializer implements CommandLineRunner {
             rider = userRepository.save(rider);
         }
 
-        userRepository.findByEmail("tupakulahemanth828@gmail.com").ifPresent(owner -> {
-            if (owner.getRole() != Role.ROLE_ADMIN) {
-                owner.setRole(Role.ROLE_ADMIN);
-                userRepository.save(owner);
+        userRepository.findAll().forEach(u -> {
+            if (com.tbh.service.AuthService.isAdminEmail(u.getEmail())) {
+                if (u.getRole() != Role.ROLE_ADMIN || !u.isDrivingLicenseVerified()) {
+                    u.setRole(Role.ROLE_ADMIN);
+                    u.setDrivingLicenseVerified(true);
+                    userRepository.save(u);
+                }
             }
         });
 

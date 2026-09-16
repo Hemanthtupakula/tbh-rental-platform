@@ -75,26 +75,28 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       colorPrimary: '#00E5C7',
       colorBackground: '#141416',
       colorText: '#FFFFFF',
-      colorTextSecondary: '#94A3B8',
-      colorInputBackground: '#0A0A0B',
-      colorInputBorder: 'rgba(255, 255, 255, 0.12)',
+      colorTextSecondary: '#CBD5E1',
+      colorInputBackground: '#1E293B',
+      colorInputText: '#FFFFFF',
+      colorInputBorder: 'rgba(255, 255, 255, 0.25)',
       borderRadius: '0.75rem',
-      fontFamily: 'Inter, sans-serif'
+      fontFamily: 'Plus Jakarta Sans, sans-serif'
     },
     elements: {
       rootBox: 'w-full flex justify-center',
       card: 'bg-transparent border-0 shadow-none w-full p-0',
       headerTitle: 'text-white font-display text-lg font-bold',
-      headerSubtitle: 'text-slate-400 text-xs',
-      socialButtonsBlockButton: 'bg-[#0A0A0B] border border-white/15 text-white hover:bg-white/5 transition rounded-xl',
+      headerSubtitle: 'text-slate-300 text-xs',
+      socialButtonsBlockButton: 'bg-[#1E293B] border border-white/20 text-white hover:bg-white/10 transition rounded-xl',
       formButtonPrimary: 'bg-[#00E5C7] text-black font-extrabold hover:bg-[#00E5C7]/90 text-xs shadow-teal-glow transition py-2.5 rounded-xl',
-      formFieldInput: 'bg-[#0A0A0B] border border-white/15 text-white focus:border-[#00E5C7] text-xs rounded-xl',
+      formFieldInput: 'bg-[#1E293B] border border-white/25 text-white focus:border-[#00E5C7] text-xs rounded-xl font-medium',
+      otpInputInput: 'bg-[#1E293B] border-2 border-[#00E5C7] text-[#00E5C7] text-xl font-extrabold text-center rounded-xl',
       footerActionLink: 'text-[#00E5C7] hover:underline text-xs font-semibold',
-      identityPreview: 'bg-[#0A0A0B] border border-white/10 text-white rounded-xl',
+      identityPreview: 'bg-[#1E293B] border border-white/20 text-white rounded-xl',
       formHeaderTitle: 'text-white text-base font-bold',
-      formHeaderSubtitle: 'text-slate-400 text-xs',
-      dividerLine: 'bg-white/10',
-      dividerText: 'text-slate-500 text-xs font-semibold'
+      formHeaderSubtitle: 'text-slate-300 text-xs',
+      dividerLine: 'bg-white/20',
+      dividerText: 'text-slate-400 text-xs font-semibold'
     }
   };
 

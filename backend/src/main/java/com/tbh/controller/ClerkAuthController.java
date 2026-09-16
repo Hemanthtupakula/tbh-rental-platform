@@ -47,8 +47,8 @@ public class ClerkAuthController {
                 clerkService.syncUserMobileVerification(user);
             }
 
-            // Auto-elevate platform owner to ROLE_ADMIN & auto-verify DL on every sync (idempotent)
-            if ("tupakulahemanth828@gmail.com".equalsIgnoreCase(user.getEmail())) {
+            // Auto-elevate platform owners/admins to ROLE_ADMIN & auto-verify DL on every sync (idempotent)
+            if (com.tbh.service.AuthService.isAdminEmail(user.getEmail())) {
                 boolean saveNeeded = false;
                 if (user.getRole() != com.tbh.entity.Role.ROLE_ADMIN) {
                     user.setRole(com.tbh.entity.Role.ROLE_ADMIN);
