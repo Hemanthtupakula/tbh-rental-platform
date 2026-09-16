@@ -3337,6 +3337,13 @@ export const api = {
     } catch {
       return [];
     }
+  },
+
+  async updateProfile(fullName: string): Promise<any> {
+    return await apiFetch<any>('/auth/profile', {
+      method: 'PATCH',
+      body: JSON.stringify({ fullName })
+    });
   }
 };
 

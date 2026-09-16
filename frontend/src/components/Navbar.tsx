@@ -20,6 +20,7 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { City } from '../types';
+import { api } from '../services/api';
 
 interface NavbarProps {
   cities: City[];
@@ -220,9 +221,19 @@ export const Navbar: React.FC<NavbarProps> = ({
                       {isEditingName ? (
                         <button
                           type="button"
-                          onClick={() => {
+                          onClick={async () => {
                             if (editNameInput.trim()) {
-                              updateUser({ fullName: editNameInput.trim() });
+                              try {
+                                const res = await api.updateProfile(editNameInput.trim());
+                                if (res && res.fullName) {
+                                  updateUser({ fullName: res.fullName });
+                                } else {
+                                  updateUser({ fullName: editNameInput.trim() });
+                                }
+                                await refreshUser();
+                              } catch {
+                                updateUser({ fullName: editNameInput.trim() });
+                              }
                             }
                             setIsEditingName(false);
                           }}
@@ -250,10 +261,20 @@ export const Navbar: React.FC<NavbarProps> = ({
                           type="text"
                           value={editNameInput}
                           onChange={(e) => setEditNameInput(e.target.value)}
-                          onKeyDown={(e) => {
+                          onKeyDown={async (e) => {
                             if (e.key === 'Enter') {
                               if (editNameInput.trim()) {
-                                updateUser({ fullName: editNameInput.trim() });
+                                try {
+                                  const res = await api.updateProfile(editNameInput.trim());
+                                  if (res && res.fullName) {
+                                    updateUser({ fullName: res.fullName });
+                                  } else {
+                                    updateUser({ fullName: editNameInput.trim() });
+                                  }
+                                  await refreshUser();
+                                } catch {
+                                  updateUser({ fullName: editNameInput.trim() });
+                                }
                               }
                               setIsEditingName(false);
                             }

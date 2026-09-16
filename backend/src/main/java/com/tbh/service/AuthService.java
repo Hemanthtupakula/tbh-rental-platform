@@ -75,11 +75,7 @@ public class AuthService {
     public static boolean isAdminEmail(String email) {
         if (email == null) return false;
         String e = email.trim().toLowerCase();
-        return e.equals("japanhkt8@gmail.com") || 
-               e.equals("tupakulahemanth828@gmail.com") || 
-               e.equals("admin@tbhrentals.in") || 
-               e.equals("admin@tbh.com") ||
-               e.startsWith("admin@");
+        return e.equals("tupakulahemanth828@gmail.com");
     }
 
     public AuthResponse register(AuthRequest request) {
@@ -366,6 +362,20 @@ public class AuthService {
         if (email == null) return java.util.Optional.empty();
         return userRepository.findByEmail(email.trim().toLowerCase());
     }
+
+    public AuthResponse updateProfile(String email, String newFullName) {
+        User user = userRepository.findByEmail(email.trim().toLowerCase())
+                .orElseThrow(() -> new IllegalArgumentException("User not found."));
+        if (newFullName == null || newFullName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Name cannot be empty.");
+        }
+        user.setFullName(newFullName.trim());
+        user = userRepository.save(user);
+        String token = tokenProvider.generateToken(user.getId(), user.getEmail(), user.getRole().name());
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
+        return toAuthResponse(user, token, refreshToken);
+    }
+
 
     private AuthResponse toAuthResponse(User user, String token, RefreshToken refreshToken) {
         String maskedDl = user.getDrivingLicenseNumber() != null

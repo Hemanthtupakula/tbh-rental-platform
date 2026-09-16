@@ -170,4 +170,25 @@ public class AuthController {
             return ResponseEntity.status(404).body(Map.of("message", e.getMessage()));
         }
     }
+
+    @PatchMapping("/profile")
+    public ResponseEntity<?> updateProfile(
+            @RequestBody Map<String, String> body,
+            org.springframework.security.core.Authentication authentication) {
+        if (authentication == null || authentication.getName() == null) {
+            return ResponseEntity.status(401).body(Map.of("message", "Unauthenticated session"));
+        }
+        try {
+            String fullName = body.get("fullName");
+            if (fullName == null || fullName.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Name cannot be empty."));
+            }
+            AuthResponse response = authService.updateProfile(authentication.getName(), fullName.trim());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
 }
+
+

@@ -77,8 +77,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const { user, isAuthenticated } = useAuth();
   const isAdminEmail = (email?: string): boolean => {
     if (!email) return false;
-    const e = email.trim().toLowerCase();
-    return e === 'japanhkt8@gmail.com' || e === 'tupakulahemanth828@gmail.com' || e === 'admin@tbhrentals.in' || e === 'admin@tbh.com' || e.startsWith('admin@');
+    return email.trim().toLowerCase() === 'tupakulahemanth828@gmail.com';
   };
 
   const isAdmin = isAuthenticated && (user?.role === 'ROLE_ADMIN' || isAdminEmail(user?.email));
@@ -265,35 +264,32 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }
   };
 
+  const [offerCreateError, setOfferCreateError] = useState<string | null>(null);
+  const [offerCreateLoading, setOfferCreateLoading] = useState(false);
+
   const handleCreateOffer = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newOffer.name.trim()) return;
-    const tempOffer: Offer = {
-      id: Date.now(),
-      name: newOffer.name.trim(),
-      description: newOffer.description.trim(),
-      discountPercentage: Number(newOffer.discountPercentage),
-      active: true,
-      validUntil: newOffer.validUntil ? `${newOffer.validUntil}T23:59:59` : undefined
-    };
-
-    setOffers(prev => [tempOffer, ...prev]);
-    setShowAddOfferModal(false);
-    setNewOffer({ name: '', description: '', discountPercentage: 10, validUntil: '' });
+    setOfferCreateError(null);
+    setOfferCreateLoading(true);
 
     try {
       const created = await api.createOffer({
-        name: tempOffer.name,
-        description: tempOffer.description,
-        discountPercentage: tempOffer.discountPercentage,
+        name: newOffer.name.trim(),
+        description: newOffer.description.trim(),
+        discountPercentage: Number(newOffer.discountPercentage),
         active: true,
-        validUntil: tempOffer.validUntil
+        validUntil: newOffer.validUntil ? `${newOffer.validUntil}T23:59:59` : undefined
       });
       if (created && created.id) {
-        setOffers(prev => prev.map(o => o.id === tempOffer.id ? created : o));
+        setOffers(prev => [created, ...prev]);
       }
-    } catch (err) {
-      console.warn('Create offer API notice:', err);
+      setShowAddOfferModal(false);
+      setNewOffer({ name: '', description: '', discountPercentage: 10, validUntil: '' });
+    } catch (err: any) {
+      setOfferCreateError(err?.message || 'Failed to create offer. Please try again.');
+    } finally {
+      setOfferCreateLoading(false);
     }
   };
 
@@ -315,41 +311,36 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }
   };
 
+  const [couponCreateError, setCouponCreateError] = useState<string | null>(null);
+  const [couponCreateLoading, setCouponCreateLoading] = useState(false);
+
   const handleCreateCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCoupon.code.trim()) return;
+    setCouponCreateError(null);
+    setCouponCreateLoading(true);
 
     const code = newCoupon.code.trim().toUpperCase();
-    const tempCoupon: Coupon = {
-      id: Date.now(),
-      code,
-      discountType: newCoupon.discountType,
-      discountValue: Number(newCoupon.discountValue),
-      minimumOrderAmount: Number(newCoupon.minimumOrderAmount),
-      maxDiscountAmount: Number(newCoupon.maxDiscountAmount),
-      active: true,
-      validUntil: newCoupon.validUntil ? `${newCoupon.validUntil}T23:59:59` : undefined
-    };
-
-    setCoupons(prev => [tempCoupon, ...prev]);
-    setShowAddCouponModal(false);
-    setNewCoupon({ code: '', discountType: 'PERCENTAGE', discountValue: 15, minimumOrderAmount: 500, maxDiscountAmount: 1000, validUntil: '' });
 
     try {
       const created = await api.createCoupon({
-        code: tempCoupon.code,
-        discountType: tempCoupon.discountType,
-        discountValue: tempCoupon.discountValue,
-        minimumOrderAmount: tempCoupon.minimumOrderAmount,
-        maxDiscountAmount: tempCoupon.maxDiscountAmount,
+        code,
+        discountType: newCoupon.discountType,
+        discountValue: Number(newCoupon.discountValue),
+        minimumOrderAmount: Number(newCoupon.minimumOrderAmount),
+        maxDiscountAmount: Number(newCoupon.maxDiscountAmount),
         active: true,
-        validUntil: tempCoupon.validUntil
+        validUntil: newCoupon.validUntil ? `${newCoupon.validUntil}T23:59:59` : undefined
       });
       if (created && created.id) {
-        setCoupons(prev => prev.map(c => c.id === tempCoupon.id ? created : c));
+        setCoupons(prev => [created, ...prev]);
       }
-    } catch (err) {
-      console.warn('Create coupon API notice:', err);
+      setShowAddCouponModal(false);
+      setNewCoupon({ code: '', discountType: 'PERCENTAGE', discountValue: 15, minimumOrderAmount: 500, maxDiscountAmount: 1000, validUntil: '' });
+    } catch (err: any) {
+      setCouponCreateError(err?.message || 'Failed to create coupon. Please try again.');
+    } finally {
+      setCouponCreateLoading(false);
     }
   };
 
@@ -1478,11 +1469,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   />
                 </div>
               </div>
+              {offerCreateError && (
+                <div className="p-2.5 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-[11px] flex items-center space-x-2">
+                  <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span>{offerCreateError}</span>
+                </div>
+              )}
               <button
                 type="submit"
-                className="w-full py-2.5 rounded-xl bg-[#00E5C7] text-black font-bold text-xs mt-2"
+                disabled={offerCreateLoading}
+                className="w-full py-2.5 rounded-xl bg-[#00E5C7] text-black font-bold text-xs mt-2 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
               >
-                Create Offer
+                {offerCreateLoading ? (
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                    <span>Creating...</span>
+                  </>
+                ) : (
+                  <span>Create Offer</span>
+                )}
               </button>
             </form>
           </div>
@@ -1566,11 +1571,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   className="w-full bg-[#0A0A0B] border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#00E5C7]"
                 />
               </div>
+              {couponCreateError && (
+                <div className="p-2.5 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-[11px] flex items-center space-x-2">
+                  <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span>{couponCreateError}</span>
+                </div>
+              )}
               <button
                 type="submit"
-                className="w-full py-2.5 rounded-xl bg-[#00E5C7] text-black font-bold text-xs mt-2"
+                disabled={couponCreateLoading}
+                className="w-full py-2.5 rounded-xl bg-[#00E5C7] text-black font-bold text-xs mt-2 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
               >
-                Create Coupon
+                {couponCreateLoading ? (
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                    <span>Creating...</span>
+                  </>
+                ) : (
+                  <span>Create Coupon</span>
+                )}
               </button>
             </form>
           </div>

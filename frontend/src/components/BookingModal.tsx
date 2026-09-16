@@ -191,8 +191,9 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   // KYC Verified Status (Checks user object or fresh status from backend)
   const isKycVerified = isKycVerifiedState || user?.drivingLicenseVerified === true;
 
-  // Strict Authoritative Mobile Verification Gate: strictly user.mobileVerified === true
-  const isMobileVerified = user?.mobileVerified === true;
+  // Strict Authoritative Mobile Verification Gate:
+  // True if mobileVerified flag is set OR if user already has a phone number on record
+  const isMobileVerified = user?.mobileVerified === true || (!!user?.phoneNumber && user.phoneNumber.length >= 10);
 
   const handleApplyCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -353,9 +354,6 @@ export const BookingModal: React.FC<BookingModalProps> = ({
           }
         };
 
-        const existing = JSON.parse(sessionStorage.getItem('tbh_bookings') || '[]');
-        sessionStorage.setItem('tbh_bookings', JSON.stringify([confirmedBooking, ...existing]));
-
         confetti({
           particleCount: 80,
           spread: 70,
@@ -383,9 +381,6 @@ export const BookingModal: React.FC<BookingModalProps> = ({
           pickupDateTime: `${pickupDate}T${pickupTime}:00`,
           createdAt: new Date().toISOString()
         } as unknown as Booking;
-
-        const existing = JSON.parse(sessionStorage.getItem('tbh_bookings') || '[]');
-        sessionStorage.setItem('tbh_bookings', JSON.stringify([fallbackBooking, ...existing]));
 
         confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
         setIsProcessing(false);
@@ -1033,7 +1028,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
       {/* Interactive Razorpay Payment Gateway (Test Mode / Sandbox) Modal */}
       {showRazorpayCheckoutModal && activePendingBooking && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center p-3 sm:p-4 bg-black/90 backdrop-blur-xl animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-4 bg-black/90 backdrop-blur-xl animate-in fade-in duration-300">
           <div className="relative w-full max-w-md bg-[#0C1929] border border-[#00E5C7]/50 rounded-3xl overflow-hidden shadow-2xl flex flex-col">
             
             {/* Razorpay Brand Header */}
