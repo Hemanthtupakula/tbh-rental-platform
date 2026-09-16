@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Gauge, 
   Zap, 
@@ -16,6 +16,7 @@ import {
 import { useLanguage } from '../context/LanguageContext';
 import { Vehicle } from '../types';
 import { buildImageKitUrl } from '../services/imageKit';
+import { getVehicleColourVariants } from '../services/vehicleColours';
 
 interface VehicleCardProps {
   vehicle: Vehicle;
@@ -53,6 +54,28 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({
   const priceUnit = 
     durationMode === 'HOURLY' ? t('perHour') :
     durationMode === 'DAILY' ? t('perDay') : t('perMonth');
+
+  // Model-specific OEM colour palette derivation
+  const colourVariants = useMemo(() => {
+    return (vehicle.colourVariants && vehicle.colourVariants.length > 0)
+      ? vehicle.colourVariants
+      : getVehicleColourVariants(vehicle);
+  }, [vehicle]);
+
+  const defaultIndex = useMemo(() => {
+    const idx = colourVariants.findIndex(c => c.photoStatus === 'AVAILABLE');
+    return idx >= 0 ? idx : 0;
+  }, [colourVariants]);
+
+  const [selectedColourIndex, setSelectedColourIndex] = useState<number>(defaultIndex);
+
+  useEffect(() => {
+    setSelectedColourIndex(defaultIndex);
+  }, [vehicle.id, defaultIndex]);
+
+  const currentColour = colourVariants[selectedColourIndex] || colourVariants[0];
+  const isPhotoAvailable = currentColour?.photoStatus === 'AVAILABLE' && currentColour.galleryImages && currentColour.galleryImages.length > 0;
+  const cardImageUrl = isPhotoAvailable ? currentColour.galleryImages[0] : vehicle.imageUrl;
 
   // Dynamic State Plate resolution based on selected city identity
   const getCityStatePlate = (cityName: string, id: number) => {
@@ -95,8 +118,8 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({
       {/* Top Media & Badges Container */}
       <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-b from-[#1E1E24] to-[#141416]">
         <img 
-          src={buildImageKitUrl(vehicle.imageUrl, { width: 600, quality: 85 })} 
-          alt={vehicle.name}
+          src={buildImageKitUrl(cardImageUrl, { width: 600, quality: 85 })} 
+          alt={`${vehicle.name} - ${currentColour?.name || ''}`}
           className={`w-full h-full object-cover object-center transition-transform duration-500 ${
             isAvailable ? 'group-hover:scale-105' : 'grayscale-[40%]'
           }`}
@@ -140,11 +163,11 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({
 
           {/* Photography Status Badge */}
           <span className={`px-2 py-1 rounded-md text-[10px] font-semibold backdrop-blur-md ${
-            vehicle.assetVerified 
+            isPhotoAvailable 
               ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' 
               : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
           }`}>
-            {vehicle.assetVerified ? 'Photos Available' : 'Photography Pending'}
+            {isPhotoAvailable ? 'Photo Available' : 'Photography Pending'}
           </span>
         </div>
 
@@ -188,22 +211,49 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({
           <p className="text-[11px] uppercase tracking-widest font-semibold text-slate-400">{vehicle.brand}</p>
           <h4 className="text-lg font-bold text-white font-display leading-snug">{vehicle.name}</h4>
           <p className="text-xs text-[#00E5C7] font-medium">{vehicle.variant || vehicle.model}</p>
-          {vehicle.colourVariants && vehicle.colourVariants.length > 0 && (
-            <div className="flex items-center space-x-1.5 mt-1.5">
-              <span className="text-[10px] font-semibold text-slate-400">Shades:</span>
-              <div className="flex items-center space-x-1">
-                {vehicle.colourVariants.map((c, i) => (
-                  <div
-                    key={i}
-                    className="w-3.5 h-3.5 rounded-full border border-white/30 shadow-sm"
-                    style={{ backgroundColor: c.hex }}
-                    title={`${c.name} (${c.photoStatus === 'AVAILABLE' ? 'Photo Available' : 'Photography Pending'})`}
-                  />
-                ))}
+          {colourVariants && colourVariants.length > 0 && (
+            <div className="mt-2.5 p-2 bg-white/[0.03] rounded-lg border border-white/5 space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-semibold text-slate-400">
+                  Shade: <span className="text-white font-bold">{currentColour?.name}</span>
+                </span>
+                <span className="text-[9px] font-mono text-slate-400">
+                  {isPhotoAvailable ? (
+                    <span className="text-emerald-400 font-medium">● Verified Photo</span>
+                  ) : (
+                    <span className="text-amber-400 font-medium">● Pending</span>
+                  )}
+                </span>
               </div>
-              <span className="text-[10px] text-slate-400 font-mono">
-                ({vehicle.colourVariants.length} color{vehicle.colourVariants.length > 1 ? 's' : ''})
-              </span>
+              <div className="flex items-center space-x-1.5 flex-wrap gap-y-1">
+                {colourVariants.map((c, i) => {
+                  const isSelected = i === selectedColourIndex;
+                  return (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedColourIndex(i);
+                      }}
+                      className={`relative group transition-all duration-200 rounded-full p-0.5 ${
+                        isSelected 
+                          ? 'ring-2 ring-[#00E5C7] ring-offset-2 ring-offset-[#141416] scale-110 z-10' 
+                          : 'hover:scale-105 opacity-70 hover:opacity-100'
+                      }`}
+                      title={`${c.name} (${c.photoStatus === 'AVAILABLE' ? 'Photo Available' : 'Photography Pending'})`}
+                    >
+                      <div
+                        className="w-4 h-4 rounded-full border border-white/40 shadow-sm"
+                        style={{ backgroundColor: c.hex }}
+                      />
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover:block z-20 whitespace-nowrap bg-black/90 text-white text-[10px] px-2 py-0.5 rounded shadow-lg border border-white/20 pointer-events-none">
+                        {c.name} {c.photoStatus !== 'AVAILABLE' && '(Pending)'}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>
