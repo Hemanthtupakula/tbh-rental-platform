@@ -137,6 +137,15 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({
               {formattedStockText()}
             </span>
           )}
+
+          {/* Photography Status Badge */}
+          <span className={`px-2 py-1 rounded-md text-[10px] font-semibold backdrop-blur-md ${
+            vehicle.assetVerified 
+              ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' 
+              : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
+          }`}>
+            {vehicle.assetVerified ? 'Photos Available' : 'Photography Pending'}
+          </span>
         </div>
 
         {/* Wishlist Heart */}
@@ -179,6 +188,24 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({
           <p className="text-[11px] uppercase tracking-widest font-semibold text-slate-400">{vehicle.brand}</p>
           <h4 className="text-lg font-bold text-white font-display leading-snug">{vehicle.name}</h4>
           <p className="text-xs text-[#00E5C7] font-medium">{vehicle.variant || vehicle.model}</p>
+          {vehicle.colourVariants && vehicle.colourVariants.length > 0 && (
+            <div className="flex items-center space-x-1.5 mt-1.5">
+              <span className="text-[10px] font-semibold text-slate-400">Shades:</span>
+              <div className="flex items-center space-x-1">
+                {vehicle.colourVariants.map((c, i) => (
+                  <div
+                    key={i}
+                    className="w-3.5 h-3.5 rounded-full border border-white/30 shadow-sm"
+                    style={{ backgroundColor: c.hex }}
+                    title={`${c.name} (${c.photoStatus === 'AVAILABLE' ? 'Photo Available' : 'Photography Pending'})`}
+                  />
+                ))}
+              </div>
+              <span className="text-[10px] text-slate-400 font-mono">
+                ({vehicle.colourVariants.length} color{vehicle.colourVariants.length > 1 ? 's' : ''})
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Performance Telemetry Grid */}
