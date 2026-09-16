@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Vehicle, VehicleColourVariant } from '../types';
 import { getVehicleColourVariants } from '../services/vehicleColours';
+import { buildImageKitUrl } from '../services/imageKit';
 import { 
   X, 
   ShieldCheck, 
@@ -214,11 +215,11 @@ export const VehicleGalleryModal: React.FC<VehicleGalleryModalProps> = ({
                 {/* Primary Photo Container */}
                 <div className="relative w-full aspect-[16/10] bg-[#0A0A0B] rounded-2xl overflow-hidden border border-white/10 group shadow-inner">
                   <img
-                    src={displayedImages[activeImageIndex] || vehicle.imageUrl}
+                    src={buildImageKitUrl(displayedImages[activeImageIndex] || vehicle.imageUrl, { width: 1200, quality: 85 })}
                     alt={`${vehicle.name} - View ${activeImageIndex + 1}`}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = vehicle.imageUrl;
+                      (e.target as HTMLImageElement).src = buildImageKitUrl(vehicle.imageUrl);
                     }}
                   />
 
@@ -331,11 +332,11 @@ export const VehicleGalleryModal: React.FC<VehicleGalleryModalProps> = ({
                       }`}
                     >
                       <img 
-                        src={imgUrl} 
+                        src={buildImageKitUrl(imgUrl, { width: 300, quality: 80 })} 
                         alt={`Thumbnail ${idx + 1}`} 
                         className="w-full h-full object-cover"
                         onError={(e) => {
-                          (e.target as HTMLImageElement).src = vehicle.imageUrl;
+                          (e.target as HTMLImageElement).src = buildImageKitUrl(vehicle.imageUrl);
                         }}
                       />
                       <div className="absolute bottom-0 inset-x-0 bg-black/85 py-0.5 text-[8px] text-center font-bold text-slate-300 truncate px-1">
@@ -592,7 +593,7 @@ export const VehicleGalleryModal: React.FC<VehicleGalleryModalProps> = ({
           </div>
 
           <img
-            src={displayedImages[activeImageIndex] || vehicle.imageUrl}
+            src={buildImageKitUrl(displayedImages[activeImageIndex] || vehicle.imageUrl, { width: 1920, quality: 90 })}
             alt={`${vehicle.name} fullscreen view`}
             className="max-h-[85vh] max-w-[90vw] object-contain rounded-xl shadow-2xl"
             onClick={(e) => e.stopPropagation()}

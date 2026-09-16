@@ -20,6 +20,7 @@ import { Vehicle, City, Booking } from '../types';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { PhoneVerificationModal } from './PhoneVerificationModal';
+import { buildImageKitUrl } from '../services/imageKit';
 
 interface BookingModalProps {
   vehicle: Vehicle | null;
@@ -124,6 +125,17 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
   const [couponError, setCouponError] = useState<string | null>(null);
   const [isApplyingCoupon, setIsApplyingCoupon] = useState<boolean>(false);
+  const [availableCoupons, setAvailableCoupons] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (vehicle) {
+      api.getCoupons().then(list => {
+        if (Array.isArray(list)) {
+          setAvailableCoupons(list.filter((c: any) => c.active !== false));
+        }
+      }).catch(() => {});
+    }
+  }, [vehicle?.id]);
 
   // Sync dropHub when dropCity changes
   useEffect(() => {
@@ -436,7 +448,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
           {/* Selected Vehicle Snapshot */}
           <div className="flex items-center space-x-3.5 p-3 rounded-2xl bg-[#0A0A0B] border border-white/10">
             <img 
-              src={vehicle.imageUrl} 
+              src={buildImageKitUrl(vehicle.imageUrl, { width: 300, quality: 80 })} 
               alt={vehicle.name} 
               className="w-18 h-14 object-cover rounded-xl border border-white/10" 
             />
@@ -822,22 +834,47 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                 </button>
               </div>
             ) : (
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Enter coupon code (e.g. TBHWELCOME, RIDE10)"
-                  value={couponCodeInput}
-                  onChange={(e) => setCouponCodeInput(e.target.value.toUpperCase())}
-                  className="flex-1 bg-[#141416] border border-white/10 rounded-xl px-3 py-2 text-xs text-white uppercase font-mono tracking-wider focus:outline-none focus:border-[#00E5C7]"
-                />
-                <button
-                  type="button"
-                  disabled={isApplyingCoupon || !couponCodeInput.trim()}
-                  onClick={handleApplyCoupon}
-                  className="px-4 py-2 rounded-xl bg-[#00E5C7]/15 hover:bg-[#00E5C7]/25 text-[#00E5C7] border border-[#00E5C7]/40 text-xs font-bold transition disabled:opacity-50"
-                >
-                  {isApplyingCoupon ? 'Checking...' : 'Apply'}
-                </button>
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Enter coupon code (e.g. TBHWELCOME, RIDE10)"
+                    value={couponCodeInput}
+                    onChange={(e) => setCouponCodeInput(e.target.value.toUpperCase())}
+                    className="flex-1 bg-[#141416] border border-white/10 rounded-xl px-3 py-2 text-xs text-white uppercase font-mono tracking-wider focus:outline-none focus:border-[#00E5C7]"
+                  />
+                  <button
+                    type="button"
+                    disabled={isApplyingCoupon || !couponCodeInput.trim()}
+                    onClick={handleApplyCoupon}
+                    className="px-4 py-2 rounded-xl bg-[#00E5C7]/15 hover:bg-[#00E5C7]/25 text-[#00E5C7] border border-[#00E5C7]/40 text-xs font-bold transition disabled:opacity-50"
+                  >
+                    {isApplyingCoupon ? 'Checking...' : 'Apply'}
+                  </button>
+                </div>
+
+                {/* 1-Click Available Admin Coupons Pill Strip */}
+                {availableCoupons.length > 0 && (
+                  <div className="flex items-center gap-1.5 overflow-x-auto pt-1 pb-0.5 scrollbar-thin">
+                    <span className="text-[10px] text-slate-300 font-bold uppercase tracking-wider shrink-0">Eligible Offers:</span>
+                    {availableCoupons.map((c: any) => (
+                      <button
+                        key={c.id || c.code}
+                        type="button"
+                        onClick={() => {
+                          setCouponCodeInput(c.code);
+                          setAppliedCoupon(c.code);
+                        }}
+                        className="shrink-0 px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/35 text-emerald-300 hover:bg-emerald-500/25 transition text-[10px] font-mono font-bold flex items-center space-x-1"
+                        title={`Click to apply ${c.code}: ${c.discountType === 'PERCENTAGE' ? `${c.discountValue}% OFF` : `₹${c.discountValue} OFF`}`}
+                      >
+                        <Tag className="w-2.5 h-2.5 text-emerald-400" />
+                        <span>{c.code}</span>
+                        <span className="text-emerald-400 font-normal">({c.discountType === 'PERCENTAGE' ? `${c.discountValue}% OFF` : `₹${c.discountValue}`})</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
             {couponError && (

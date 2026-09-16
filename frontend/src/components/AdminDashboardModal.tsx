@@ -12,6 +12,7 @@ import {
 import { Vehicle, City, LicenseVerification, AdminMetrics } from '../types';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { buildImageKitUrl } from '../services/imageKit';
 
 interface AdminDashboardModalProps {
   isOpen: boolean;
@@ -225,12 +226,22 @@ export const AdminDashboardModal: React.FC<AdminDashboardModalProps> = ({
                     className="p-3 rounded-xl bg-[#0A0A0B] border border-white/5 flex items-center justify-between"
                   >
                     <div className="flex items-center space-x-3">
-                      <img src={v.imageUrl} alt={v.name} className="w-12 h-10 object-cover rounded-lg" />
+                      <img src={buildImageKitUrl(v.imageUrl, { width: 200, quality: 80 })} alt={v.name} className="w-12 h-10 object-cover rounded-lg" />
                       <div>
                         <div className="flex items-center space-x-2">
                           <h5 className="text-xs font-bold text-white">{v.name}</h5>
                           <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-white/10 text-slate-300">
-                            {v.maskedRegistrationNumber || 'TS09••••1234'}
+                            {(() => {
+                              if (v.maskedRegistrationNumber && !v.maskedRegistrationNumber.includes('TS09••••1234')) {
+                                return v.maskedRegistrationNumber;
+                              }
+                              const isEv = v.fuelType === 'ELECTRIC' || v.id >= 42;
+                              const prefixes = ['KA-01', 'MH-12', 'TS-09', 'DL-03', 'TN-09', 'KL-07', 'GJ-01', 'RJ-14', 'WB-02', 'GA-07'];
+                              const p = prefixes[v.id % prefixes.length];
+                              const tag = isEv ? 'EV' : (v.id % 2 === 0 ? 'EQ' : 'TR');
+                              const digits = String(1000 + ((v.id * 47 + 1289) % 8999));
+                              return `${p}-${tag}-${digits.substring(0, 2)}••••`;
+                            })()}
                           </span>
                         </div>
                         <p className="text-[10px] text-slate-400">{v.vehicleType} • ₹{v.pricePerHour}/hr • ₹{v.pricePerDay}/day</p>

@@ -110,14 +110,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         {/* Header */}
         <div className="p-5 border-b border-white/10 flex items-center justify-between">
           <div className="flex items-center space-x-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#00E5C7]/15 border border-[#00E5C7]/40 flex items-center justify-center text-[#00E5C7] font-bold">
-              TBH
-            </div>
+            <img src="/assets/tbh-logo-dark.png" alt="TBH" className="h-10 w-auto object-contain" />
             <div>
               <h3 id="auth-modal-title" className="font-extrabold font-display text-base text-white">
                 {activeTab === 'LICENSE' ? 'Driving Licence KYC' : 'Rider Authentication'}
               </h3>
-              <p className="text-[11px] text-slate-400">
+              <p className="text-[11px] text-slate-200 font-medium">
                 {activeTab === 'LICENSE' ? 'Motor Vehicles Act Identity Compliance' : 'Clerk Verified Account Sign In & Creation'}
               </p>
             </div>

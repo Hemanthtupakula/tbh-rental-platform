@@ -47,14 +47,19 @@ export function buildImageKitUrl(pathOrUrl: string, options?: ImageTransformOpti
 
   const transformQuery = `tr=${transformParts.join(',')}`;
 
-  // If already an absolute ImageKit URL
-  if (pathOrUrl.includes('ik.imagekit.io')) {
-    const separator = pathOrUrl.includes('?') ? '&' : '?';
-    return `${pathOrUrl}${separator}${transformQuery}`;
+  // If absolute HTTP/HTTPS URL (e.g. BikeDekho, CarDekho, ImageKit), return directly
+  if (pathOrUrl.startsWith('http://') || pathOrUrl.startsWith('https://')) {
+    return pathOrUrl;
   }
 
-  // If local asset path, return local path
-  if (pathOrUrl.startsWith('/') || pathOrUrl.startsWith('http://localhost') || pathOrUrl.startsWith('data:')) {
+  // If path starts with /vehicles/, resolve directly to ImageKit vehicle storage
+  if (pathOrUrl.startsWith('/vehicles/')) {
+    const cleanPath = pathOrUrl.substring('/vehicles/'.length);
+    return `${IMAGEKIT_ENDPOINT}/tbh/vehicles/${cleanPath}?${transformQuery}`;
+  }
+
+  // If local asset path (e.g. /assets/ or /images/), return local path
+  if (pathOrUrl.startsWith('/assets/') || pathOrUrl.startsWith('/images/') || pathOrUrl.startsWith('http://localhost') || pathOrUrl.startsWith('data:')) {
     return pathOrUrl;
   }
 

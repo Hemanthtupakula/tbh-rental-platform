@@ -15,6 +15,7 @@ import {
   Clock 
 } from 'lucide-react';
 import { Vehicle } from '../types';
+import { buildImageKitUrl } from '../services/imageKit';
 
 interface VehicleCompareModalProps {
   isOpen: boolean;
@@ -149,7 +150,7 @@ export const VehicleCompareModal: React.FC<VehicleCompareModalProps> = ({
                   >
                     <div>
                       <img
-                        src={v.imageUrl}
+                        src={buildImageKitUrl(v.imageUrl, { width: 400, quality: 80 })}
                         alt={v.name}
                         className="w-full h-28 object-cover rounded-xl mb-2 group-hover:scale-[1.02] transition-transform"
                       />
@@ -213,7 +214,7 @@ export const VehicleCompareModal: React.FC<VehicleCompareModalProps> = ({
                         onClick={() => handleAddVehicle(v)}
                         className="p-2 rounded-xl bg-[#141416] hover:bg-[#00E5C7]/10 border border-white/10 hover:border-[#00E5C7]/40 text-left transition"
                       >
-                        <img src={v.imageUrl} alt={v.name} className="w-full h-14 object-cover rounded-lg mb-1" />
+                        <img src={buildImageKitUrl(v.imageUrl, { width: 300, quality: 80 })} alt={v.name} className="w-full h-14 object-cover rounded-lg mb-1" />
                         <p className="text-[11px] font-bold text-white truncate">{v.name}</p>
                         <p className="text-[10px] text-[#00E5C7]">₹{v.pricePerHour}/hr</p>
                       </button>
@@ -240,7 +241,7 @@ export const VehicleCompareModal: React.FC<VehicleCompareModalProps> = ({
                             <X className="w-3.5 h-3.5" />
                           </button>
                           <img
-                            src={v.imageUrl}
+                            src={buildImageKitUrl(v.imageUrl, { width: 400, quality: 80 })}
                             alt={v.name}
                             className="w-full h-28 object-cover rounded-xl mb-2 border border-white/10"
                           />

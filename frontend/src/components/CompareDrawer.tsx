@@ -1,6 +1,7 @@
 import React from 'react';
 import { Layers, X, ArrowRight, Trash2 } from 'lucide-react';
 import { Vehicle } from '../types';
+import { buildImageKitUrl } from '../services/imageKit';
 
 interface CompareDrawerProps {
   vehicles: Vehicle[];
@@ -55,7 +56,7 @@ export const CompareDrawer: React.FC<CompareDrawerProps> = ({
               className="flex items-center space-x-2 px-2.5 py-1.5 rounded-xl bg-[#0A0A0B] border border-white/10 shrink-0"
             >
               <img
-                src={v.imageUrl}
+                src={buildImageKitUrl(v.imageUrl, { width: 100, quality: 80 })}
                 alt={v.name}
                 className="w-8 h-6 object-cover rounded-md"
               />

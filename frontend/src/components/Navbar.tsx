@@ -55,26 +55,12 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         
         {/* Brand Logo & Tagline */}
-        <div className="flex items-center space-x-3 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-          <div className="relative flex items-center">
-            {/* Custom geometric monogram logo */}
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#141416] via-[#1E1E24] to-[#0A0A0B] border border-[#00E5C7]/40 flex items-center justify-center shadow-teal-glow">
-              <svg className="w-7 h-7" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                {/* Stylized T with speed line and wheel */}
-                <path d="M6 10H22M14 10V32" stroke="#00E5C7" strokeWidth="3.5" strokeLinecap="round" />
-                <path d="M22 6L32 10L22 14" stroke="#D4AF37" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                <circle cx="28" cy="24" r="6" stroke="#FFFFFF" strokeWidth="2.5" />
-                <path d="M28 20V28M24 24H32" stroke="#00E5C7" strokeWidth="1.5" strokeLinecap="round" />
-              </svg>
-            </div>
-          </div>
-          <div>
-            <div className="flex items-baseline space-x-1.5">
-              <span className="text-2xl font-extrabold tracking-wider font-display text-white">TBH</span>
-              <span className="text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded bg-[#00E5C7]/10 text-[#00E5C7] border border-[#00E5C7]/30">INDIA</span>
-            </div>
-            <p className="text-[10px] tracking-widest uppercase text-slate-400 font-semibold">{t('tagline')}</p>
-          </div>
+        <div className="flex items-center cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+          <img 
+            src="/assets/tbh-logo-dark.png" 
+            alt="TBH - Ride Beyond Limits" 
+            className="h-14 w-auto object-contain hover:scale-105 transition-transform duration-200 drop-shadow-[0_0_12px_rgba(0,229,199,0.3)]" 
+          />
         </div>
 
         {/* Center: City Hub Selector */}

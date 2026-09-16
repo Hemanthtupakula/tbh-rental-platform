@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { Vehicle } from '../types';
+import { buildImageKitUrl } from '../services/imageKit';
 
 interface VehicleCardProps {
   vehicle: Vehicle;
@@ -61,14 +62,14 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({
       {/* Top Media & Badges Container */}
       <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-b from-[#1E1E24] to-[#141416]">
         <img 
-          src={vehicle.imageUrl} 
+          src={buildImageKitUrl(vehicle.imageUrl, { width: 600, quality: 85 })} 
           alt={vehicle.name}
           className={`w-full h-full object-cover object-center transition-transform duration-500 ${
             isAvailable ? 'group-hover:scale-105' : 'grayscale-[40%]'
           }`}
           loading="lazy"
           onError={(e) => {
-            // Fallback placeholder if local asset path is missing
+            // Fallback placeholder if asset path is missing
             (e.target as HTMLImageElement).src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400"><rect fill="%23141416" width="600" height="400"/><text fill="%2300E5C7" font-family="sans-serif" font-size="24" font-weight="bold" x="50%" y="50%" text-anchor="middle">TBH FLEET UNIT</text></svg>';
           }}
         />
@@ -87,7 +88,17 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({
             {vehicle.fuelType}
           </span>
           <span className="px-2 py-1 rounded-md text-[10px] font-mono font-bold tracking-wider bg-black/80 text-white/90 border border-white/20 backdrop-blur-md">
-            {vehicle.maskedRegistrationNumber || 'TS09••••1234'}
+            {(() => {
+              if (vehicle.maskedRegistrationNumber && !vehicle.maskedRegistrationNumber.includes('TS09••••1234')) {
+                return vehicle.maskedRegistrationNumber;
+              }
+              const isEv = vehicle.fuelType === 'ELECTRIC' || vehicle.id >= 42;
+              const prefixes = ['KA-01', 'MH-12', 'TS-09', 'DL-03', 'TN-09', 'KL-07', 'GJ-01', 'RJ-14', 'WB-02', 'GA-07'];
+              const p = prefixes[vehicle.id % prefixes.length];
+              const tag = isEv ? 'EV' : (vehicle.id % 2 === 0 ? 'EQ' : 'TR');
+              const digits = String(1000 + ((vehicle.id * 47 + 1289) % 8999));
+              return `${p}-${tag}-${digits.substring(0, 2)}••••`;
+            })()}
           </span>
           
           {/* Availability Status Badge */}

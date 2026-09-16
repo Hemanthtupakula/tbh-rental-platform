@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Phone, Mail, MapPin, ShieldCheck, Heart } from 'lucide-react';
 
 export const Footer: React.FC = () => {
@@ -10,14 +10,12 @@ export const Footer: React.FC = () => {
           
           {/* Brand Col */}
           <div className="space-y-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#141416] to-[#0A0A0B] border border-[#00E5C7]/40 flex items-center justify-center">
-                <span className="font-display font-extrabold text-[#00E5C7] text-lg">T</span>
-              </div>
-              <div>
-                <span className="text-xl font-extrabold text-white font-display">TBH</span>
-                <p className="text-[10px] tracking-widest uppercase text-slate-400 font-semibold">Ride Beyond Limits</p>
-              </div>
+            <div className="flex items-center cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+              <img 
+                src="/assets/tbh-logo-dark.png" 
+                alt="TBH - Ride Beyond Limits" 
+                className="h-12 w-auto object-contain" 
+              />
             </div>
             <p className="text-xs text-slate-400 leading-relaxed">
               India's foremost luxury bike and car rental platform. Seamless 3D vehicle visualization, transparent hourly INR rates, and pan-India airport hubs.

@@ -92,12 +92,17 @@ html.light ::-webkit-scrollbar-thumb {
 
 /* Printable Rental Boarding Ticket Styles */
 @media print {
-  body {
-    background: #FFFFFF !important;
-    color: #000000 !important;
+  @page {
+    size: A4 portrait;
+    margin: 5mm;
   }
 
-  /* Hide everything on page except the printable ticket */
+  html, body {
+    height: 100% !important;
+    overflow: hidden !important;
+    background: #FFFFFF !important;
+  }
+
   body * {
     visibility: hidden;
   }
@@ -113,13 +118,18 @@ html.light ::-webkit-scrollbar-thumb {
     top: 0;
     width: 100% !important;
     max-width: 100% !important;
+    max-height: 98vh !important;
     margin: 0 !important;
-    padding: 24px !important;
+    padding: 16px !important;
     background: #FFFFFF !important;
     color: #000000 !important;
     border: 2px solid #000000 !important;
     border-radius: 12px !important;
     box-shadow: none !important;
+    page-break-after: avoid !important;
+    page-break-inside: avoid !important;
+    break-after: avoid !important;
+    break-inside: avoid !important;
   }
 
   #printable-rental-ticket .no-print {
