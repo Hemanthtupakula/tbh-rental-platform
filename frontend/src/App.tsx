@@ -127,10 +127,10 @@ const AppContent: React.FC = () => {
       if (fuelFilter !== 'ALL' && v.fuelType !== fuelFilter) return false;
       // Search query
       if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase();
-        const matchName = v.name.toLowerCase().includes(query);
-        const matchBrand = v.brand.toLowerCase().includes(query);
-        const matchModel = v.model.toLowerCase().includes(query);
+        const query = (typeof searchQuery === 'string' ? searchQuery : '').toLowerCase();
+        const matchName = (typeof v.name === 'string' ? v.name : '').toLowerCase().includes(query);
+        const matchBrand = (typeof v.brand === 'string' ? v.brand : '').toLowerCase().includes(query);
+        const matchModel = (typeof v.model === 'string' ? v.model : '').toLowerCase().includes(query);
         if (!matchName && !matchBrand && !matchModel) return false;
       }
       return true;

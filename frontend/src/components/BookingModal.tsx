@@ -288,39 +288,78 @@ export const BookingModal: React.FC<BookingModalProps> = ({
       };
 
       // 1. Transactional reservation hold creation
-      let pendingBooking: any = null;
-      try {
-        pendingBooking = await api.createBooking(bookingData);
-      } catch (backendErr) {
-        console.warn('Backend booking notice, creating local test hold:', backendErr);
-        const testRef = 'TBH-REF-' + Math.floor(100000 + Math.random() * 900000);
-        pendingBooking = {
-          id: Date.now(),
-          bookingReference: testRef,
-          user: { ...user, aadhaarNumber: aadhaarNumber || user?.aadhaarNumber || '' },
-          vehicle,
-          pickupCity,
-          dropCity,
-          pickupHub,
-          dropHub,
-          duration,
-          totalAmount: totalPayable,
-          razorpayOrderId: 'order_rzp_test_' + Math.floor(100000 + Math.random() * 900000),
-          razorpayKeyId: 'rzp_test_tbh_mock_key',
-          status: 'PENDING',
-          paymentStatus: 'INITIATED',
-          pickupDateTime: `${pickupDate}T${pickupTime}:00`,
-          createdAt: new Date().toISOString()
-        };
+      const pendingBooking = await api.createBooking(bookingData);
+
+      if (!pendingBooking || !pendingBooking.bookingReference || !pendingBooking.razorpayOrderId) {
+        throw new Error('Unable to create reservation. Please try again.');
       }
 
       setActivePendingBooking(pendingBooking);
+
+      // Launch official Razorpay Checkout SDK if valid key and script loaded
+      const scriptLoaded = await loadRazorpayScript();
+      if (scriptLoaded && (window as any).Razorpay && pendingBooking.razorpayKeyId && !pendingBooking.razorpayKeyId.includes('mock')) {
+        const options = {
+          key: pendingBooking.razorpayKeyId,
+          amount: Math.round(totalPayable * 100),
+          currency: 'INR',
+          name: 'TBH Rentals',
+          description: `${vehicle.name} (${typeof rentalMode === 'string' ? rentalMode : ''})`,
+          order_id: pendingBooking.razorpayOrderId,
+          prefill: {
+            name: user.fullName || '',
+            email: user.email || '',
+            contact: user.phoneNumber || ''
+          },
+          theme: { color: '#00E5C7' },
+          handler: async (response: any) => {
+            setIsRazorpayPaying(true);
+            try {
+              const verifyRes = await api.verifyPayment({
+                bookingReference: pendingBooking.bookingReference,
+                razorpayOrderId: response.razorpay_order_id || pendingBooking.razorpayOrderId,
+                razorpayPaymentId: response.razorpay_payment_id,
+                razorpaySignature: response.razorpay_signature
+              });
+
+              if (verifyRes && (verifyRes.status === 'SUCCESS' || verifyRes.booking?.status === 'CONFIRMED') && verifyRes.booking) {
+                confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+                setIsProcessing(false);
+                setShowRazorpayCheckoutModal(false);
+                onBookingSuccess(verifyRes.booking);
+              } else {
+                setErrorMessage(verifyRes?.message || 'Payment verification failed. Reservation not confirmed.');
+                setIsProcessing(false);
+              }
+            } catch (verErr: any) {
+              setErrorMessage(verErr.message || 'Payment verification failed. Reservation not confirmed.');
+              setIsProcessing(false);
+            } finally {
+              setIsRazorpayPaying(false);
+            }
+          },
+          modal: {
+            ondismiss: () => {
+              setIsProcessing(false);
+            }
+          }
+        };
+
+        const rzp = new (window as any).Razorpay(options);
+        rzp.on('payment.failed', (resp: any) => {
+          setErrorMessage(resp.error?.description || 'Payment failed. Please try again.');
+          setIsProcessing(false);
+        });
+        rzp.open();
+        return;
+      }
+
       setIsProcessing(false);
       setShowRazorpayCheckoutModal(true);
       return;
     } catch (err: any) {
       setIsProcessing(false);
-      const msg = err.message || 'Vehicle reservation could not be processed.';
+      const msg = err.message || 'Unable to create reservation. Please try again.';
       setErrorMessage(msg);
       if (msg.includes('KYC') || msg.includes('licence') || msg.includes('422')) {
         if (onOpenKyc) {
@@ -333,27 +372,20 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   const handleRazorpayCheckoutSuccess = async () => {
     if (!activePendingBooking) return;
     setIsRazorpayPaying(true);
+    setErrorMessage(null);
 
-    setTimeout(async () => {
-      try {
-        const mockVerifyRes = await api.verifyPayment({
-          bookingReference: activePendingBooking.bookingReference,
-          razorpayOrderId: activePendingBooking.razorpayOrderId || 'order_mock_' + Date.now(),
-          razorpayPaymentId: 'pay_rzp_test_' + Math.random().toString(36).substring(2, 12),
-          razorpaySignature: 'sig_mock_auto_verified'
-        });
+    try {
+      const paymentId = 'pay_rzp_test_' + Math.random().toString(36).substring(2, 14);
+      const signature = 'sig_rzp_test_' + Math.random().toString(36).substring(2, 14);
 
-        const confirmedBooking: Booking = mockVerifyRes.booking || {
-          ...activePendingBooking,
-          status: 'CONFIRMED',
-          paymentStatus: 'PAID',
-          unlockPin: mockVerifyRes.unlockPin || String(Math.floor(1000 + Math.random() * 9000)),
-          user: {
-            ...user,
-            aadhaarNumber: aadhaarNumber || user?.aadhaarNumber || ''
-          }
-        };
+      const verifyRes = await api.verifyPayment({
+        bookingReference: activePendingBooking.bookingReference,
+        razorpayOrderId: activePendingBooking.razorpayOrderId,
+        razorpayPaymentId: paymentId,
+        razorpaySignature: signature
+      });
 
+      if (verifyRes && (verifyRes.status === 'SUCCESS' || verifyRes.booking?.status === 'CONFIRMED') && verifyRes.booking) {
         confetti({
           particleCount: 80,
           spread: 70,
@@ -362,34 +394,19 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
         setIsProcessing(false);
         setShowRazorpayCheckoutModal(false);
-        onBookingSuccess(confirmedBooking);
-      } catch (verErr) {
-        const fallbackBooking: Booking = {
-          id: Date.now(),
-          bookingReference: activePendingBooking.bookingReference || ('TBH-REF-' + Math.floor(100000 + Math.random() * 900000)),
-          user: { ...user, aadhaarNumber: aadhaarNumber || user?.aadhaarNumber || '' },
-          vehicle,
-          pickupCity,
-          dropCity,
-          pickupHub,
-          dropHub,
-          duration,
-          totalAmount: totalPayable,
-          status: 'CONFIRMED',
-          paymentStatus: 'PAID',
-          unlockPin: String(Math.floor(1000 + Math.random() * 9000)),
-          pickupDateTime: `${pickupDate}T${pickupTime}:00`,
-          createdAt: new Date().toISOString()
-        } as unknown as Booking;
-
-        confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
-        setIsProcessing(false);
+        onBookingSuccess(verifyRes.booking);
+      } else {
+        setErrorMessage(verifyRes?.message || 'Payment verification failed. Reservation remains unconfirmed.');
         setShowRazorpayCheckoutModal(false);
-        onBookingSuccess(fallbackBooking);
-      } finally {
-        setIsRazorpayPaying(false);
+        setIsProcessing(false);
       }
-    }, 1200);
+    } catch (verErr: any) {
+      setErrorMessage(verErr.message || 'Payment verification failed. Reservation remains unconfirmed.');
+      setShowRazorpayCheckoutModal(false);
+      setIsProcessing(false);
+    } finally {
+      setIsRazorpayPaying(false);
+    }
   };
 
   return (
@@ -859,7 +876,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
           {/* Step 4: Transparent INR Price Breakdown */}
           <div className="p-4 rounded-2xl bg-[#0A0A0B] border border-white/10 space-y-2">
             <div className="flex justify-between text-xs text-slate-300">
-              <span>Base Rent ({duration} {rentalMode.toLowerCase()})</span>
+              <span>Base Rent ({duration} {(typeof rentalMode === 'string' ? rentalMode : '').toLowerCase()})</span>
               <span className="font-mono text-white font-semibold">₹{baseRent.toLocaleString('en-IN')}</span>
             </div>
             {discountAmount > 0 && (
@@ -1069,7 +1086,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                   <p className="text-sm font-extrabold font-mono text-[#00E5C7] mt-0.5">
                     {activePendingBooking.bookingReference}
                   </p>
-                  <p className="text-[10px] text-slate-400 mt-0.5">{vehicle.name} ({rentalMode.toLowerCase()})</p>
+                  <p className="text-[10px] text-slate-400 mt-0.5">{vehicle.name} ({(typeof rentalMode === 'string' ? rentalMode : '').toLowerCase()})</p>
                 </div>
                 <div className="text-right">
                   <p className="text-[10px] uppercase font-bold text-slate-400">Total Payable</p>

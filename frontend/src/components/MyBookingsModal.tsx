@@ -101,7 +101,7 @@ export const MyBookingsModal: React.FC<MyBookingsModalProps> = ({ isOpen, onClos
                   <h4 className="text-sm font-bold text-white">{booking.vehicle.name}</h4>
                   <p className="text-xs text-slate-400 flex items-center space-x-1">
                     <MapPin className="w-3 h-3 text-[#00E5C7]" />
-                    <span>{booking.pickupHub} • {booking.duration} {booking.rentalMode.toLowerCase()}</span>
+                    <span>{booking.pickupHub} • {booking.duration} {(typeof booking.rentalMode === 'string' ? booking.rentalMode : '').toLowerCase()}</span>
                   </p>
                   {booking.status === 'CANCELLED' ? (
                     <p className="text-xs text-rose-400 font-semibold flex items-center space-x-1">

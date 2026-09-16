@@ -48,11 +48,11 @@ export const VehicleCompareModal: React.FC<VehicleCompareModalProps> = ({
   const availableToAdd = allVehicles.filter(
     av => !vehicles.some(cv => cv.id === av.id)
   ).filter(v => {
-    if (!searchQuery.trim()) return true;
-    const q = searchQuery.toLowerCase();
-    return v.name.toLowerCase().includes(q) || 
-           v.brand.toLowerCase().includes(q) ||
-           v.vehicleType.toLowerCase().includes(q);
+    const q = (typeof searchQuery === 'string' ? searchQuery : '').toLowerCase();
+    const matchName = (typeof v.name === 'string' ? v.name : '').toLowerCase().includes(q);
+    const matchBrand = (typeof v.brand === 'string' ? v.brand : '').toLowerCase().includes(q);
+    const matchType = (typeof v.vehicleType === 'string' ? v.vehicleType : '').toLowerCase().includes(q);
+    return matchName || matchBrand || matchType;
   });
 
   const handleAddVehicle = (v: Vehicle) => {

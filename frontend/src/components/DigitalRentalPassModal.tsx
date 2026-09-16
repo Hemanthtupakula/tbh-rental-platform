@@ -25,7 +25,7 @@ export const DigitalRentalPassModal: React.FC<DigitalRentalPassModalProps> = ({ 
 
   const getCityPlate = () => {
     if (booking.fleetUnit?.registrationNumber) return booking.fleetUnit.registrationNumber;
-    const city = (booking.pickupCity || '').toLowerCase();
+    const city = (typeof booking.pickupCity === 'string' ? booking.pickupCity : '').toLowerCase();
     if (city.includes('bengaluru') || city.includes('bangalore')) return 'KA-01-TBH-2041';
     if (city.includes('chennai')) return 'TN-09-TBH-3102';
     if (city.includes('mumbai')) return 'MH-01-TBH-4019';
@@ -235,7 +235,7 @@ export const DigitalRentalPassModal: React.FC<DigitalRentalPassModalProps> = ({ 
                 <Clock className="w-3 h-3 text-[#00E5C7]" />
                 <span>Duration Mode</span>
               </p>
-              <p className="font-bold text-white text-xs mt-0.5">{booking.duration} {booking.rentalMode.toLowerCase()}</p>
+              <p className="font-bold text-white text-xs mt-0.5">{booking.duration} {(typeof booking.rentalMode === 'string' ? booking.rentalMode : '').toLowerCase()}</p>
               <p className="text-[9px] text-slate-400">Within 10-day active window</p>
             </div>
 

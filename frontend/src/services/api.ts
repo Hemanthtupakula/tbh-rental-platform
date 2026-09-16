@@ -2896,7 +2896,7 @@ export const api = {
 
     // Fallback filtering on INITIAL_VEHICLES
     return INITIAL_VEHICLES.filter(v => {
-      if (city && city !== 'ALL' && !v.cityNames.toLowerCase().includes(city.toLowerCase())) return false;
+      if (city && city !== 'ALL' && !(typeof v.cityNames === 'string' ? v.cityNames : '').toLowerCase().includes(city.toLowerCase())) return false;
       if (type && type !== 'ALL' && v.vehicleType !== type) return false;
       if (fuel && fuel !== 'ALL' && v.fuelType !== fuel) return false;
       return true;
