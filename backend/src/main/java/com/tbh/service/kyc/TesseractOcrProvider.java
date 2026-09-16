@@ -121,24 +121,24 @@ public class TesseractOcrProvider implements DlOcrProvider {
             pb.redirectErrorStream(true);
 
             Process process = pb.start();
-            boolean finished = process.waitFor(15, TimeUnit.SECONDS);
+            boolean finished = process.waitFor(6, TimeUnit.SECONDS);
 
             if (!finished) {
                 process.destroyForcibly();
-                log.warn("[TESSERACT OCR] Execution timed out after 15 seconds.");
+                log.warn("[TESSERACT OCR] Execution timed out after 6 seconds.");
                 return new OcrRawResult(OcrStatus.OCR_UNAVAILABLE, null, "Tesseract", "OCR execution timed out.");
             }
 
             if (outputTxtFile.exists()) {
                 String extracted = Files.readString(outputTxtFile.toPath());
                 if (extracted != null && !extracted.trim().isEmpty()) {
-                    log.info("[TESSERACT OCR] Successfully extracted {} characters of text. Length={}", extracted.length(), extracted.length());
+                    log.info("[TESSERACT OCR] Successfully extracted {} characters of text.", extracted.length());
                     return new OcrRawResult(OcrStatus.OCR_SUCCESS, extracted, "Tesseract", "Text extracted successfully.");
                 } else {
                     return new OcrRawResult(OcrStatus.OCR_INCOMPLETE, "", "Tesseract", "No legible text found on document.");
                 }
             } else {
-                return new OcrRawResult(OcrStatus.OCR_INCOMPLETE, "", "Tesseract", "OCR completed without text output.");
+                return new OcrRawResult(OcrStatus.OCR_INCOMPLETE, "", "Tesseract", "OCR output file missing.");
             }
 
         } catch (Exception e) {
@@ -162,10 +162,15 @@ public class TesseractOcrProvider implements DlOcrProvider {
             BufferedImage src = ImageIO.read(original);
             if (src == null) return null;
 
-            // Convert to grayscale & upscale if small
+            // Convert to grayscale & scale to optimal OCR size (1000-1200px max width)
             int w = src.getWidth();
             int h = src.getHeight();
-            double scale = (w < 1000) ? 1.5 : 1.0;
+            double scale = 1.0;
+            if (w < 800) {
+                scale = 1.5;
+            } else if (w > 1200) {
+                scale = 1200.0 / w;
+            }
             int newW = (int)(w * scale);
             int newH = (int)(h * scale);
 

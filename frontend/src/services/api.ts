@@ -3038,7 +3038,7 @@ export const api = {
   async uploadKyc(formData: FormData): Promise<any> {
     const token = await getFreshAuthToken();
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 20000);
+    const timeoutId = setTimeout(() => controller.abort(), 60000);
     try {
       const res = await fetch(`${API_BASE}/kyc/upload`, {
         method: 'POST',
@@ -3072,6 +3072,11 @@ export const api = {
         } catch {}
       }
       return data;
+    } catch (err: any) {
+      if (err?.name === 'AbortError' || err?.message?.includes('aborted')) {
+        throw new Error('Image scan timed out. Please upload a smaller image file or fill in details below.');
+      }
+      throw err;
     } finally {
       clearTimeout(timeoutId);
     }
