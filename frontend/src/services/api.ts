@@ -2759,7 +2759,7 @@ async function refreshAuthToken(): Promise<string | null> {
 }
 
 export async function apiFetch<T = any>(endpoint: string, options: ApiFetchOptions = {}): Promise<T> {
-  const { timeoutMs = 15000, skipAuth = false, headers = {}, ...rest } = options;
+  const { timeoutMs = 45000, skipAuth = false, headers = {}, ...rest } = options;
   const url = endpoint.startsWith('http') ? endpoint : `${API_BASE}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
 
   const token = !skipAuth ? await getFreshAuthToken() : null;

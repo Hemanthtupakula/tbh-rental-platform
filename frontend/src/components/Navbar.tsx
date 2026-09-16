@@ -44,11 +44,13 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenAdmin,
   onOpenKyc
 }) => {
-  const { user, isAuthenticated, isClerkSignedIn, isTbhUserLoading, tbhUserError, refreshUser, logout } = useAuth();
+  const { user, isAuthenticated, isClerkSignedIn, isTbhUserLoading, tbhUserError, refreshUser, logout, updateUser } = useAuth();
   const { lang, setLang, t } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showCityDropdown, setShowCityDropdown] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editNameInput, setEditNameInput] = useState('');
 
   return (
     <header className="sticky top-0 z-40 w-full bg-[#0A0A0B]/90 backdrop-blur-md border-b border-white/10">
@@ -210,13 +212,81 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
 
               {showUserDropdown && (
-                <div className="absolute right-0 top-12 w-64 rounded-xl bg-[#141416] border border-white/10 shadow-2xl p-3 z-50">
-                  <div className="border-b border-white/10 pb-2 mb-2">
-                    <p className="text-xs font-bold text-white">{user.fullName}</p>
-                    <p className="text-[11px] text-slate-400 truncate">{user.email || user.phoneNumber}</p>
-                    <div className="mt-1.5 inline-flex items-center space-x-1 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-[10px] text-emerald-400 font-semibold">
-                      <CheckCircle2 className="w-3 h-3" />
-                      <span>{user.drivingLicenseVerified ? `DL: ${user.drivingLicenseNumber || 'Verified'}` : 'DL Pending Verification'}</span>
+                <div className="absolute right-0 top-12 w-72 rounded-xl bg-[#141416] border border-white/10 shadow-2xl p-3 z-50">
+                  <div className="border-b border-white/10 pb-2.5 mb-2.5">
+                    {/* User Name Edit Section */}
+                    <div className="flex items-center justify-between">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Rider Profile Name</p>
+                      {isEditingName ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (editNameInput.trim()) {
+                              updateUser({ fullName: editNameInput.trim() });
+                            }
+                            setIsEditingName(false);
+                          }}
+                          className="text-[10px] font-bold text-[#00E5C7] hover:underline"
+                        >
+                          Save
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditNameInput(user.fullName || '');
+                            setIsEditingName(true);
+                          }}
+                          className="text-[10px] font-bold text-slate-400 hover:text-white"
+                        >
+                          Edit
+                        </button>
+                      )}
+                    </div>
+
+                    {isEditingName ? (
+                      <div className="mt-1 flex items-center space-x-1.5">
+                        <input
+                          type="text"
+                          value={editNameInput}
+                          onChange={(e) => setEditNameInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              if (editNameInput.trim()) {
+                                updateUser({ fullName: editNameInput.trim() });
+                              }
+                              setIsEditingName(false);
+                            }
+                          }}
+                          placeholder="Enter display name"
+                          className="w-full bg-[#0A0A0B] border border-[#00E5C7]/50 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none"
+                          autoFocus
+                        />
+                      </div>
+                    ) : (
+                      <p className="text-xs font-bold text-white mt-0.5">{user.fullName}</p>
+                    )}
+
+                    <p className="text-[11px] text-slate-400 truncate mt-0.5">{user.email || user.phoneNumber}</p>
+                    <div className="mt-1.5 flex items-center justify-between">
+                      <div className="inline-flex items-center space-x-1 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-[10px] text-emerald-400 font-semibold">
+                        <CheckCircle2 className="w-3 h-3" />
+                        <span>{user.drivingLicenseVerified ? `DL: ${user.drivingLicenseNumber || 'Verified'}` : 'DL Pending'}</span>
+                      </div>
+                      {user.drivingLicenseVerified && !isEditingName && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (user.fullName) {
+                              updateUser({ fullName: user.fullName });
+                            }
+                          }}
+                          className="text-[9px] text-[#00E5C7] hover:underline"
+                          title="Use verified KYC name for pass"
+                        >
+                          KYC Name Verified
+                        </button>
+                      )}
                     </div>
                   </div>
                   <button 

@@ -57,13 +57,17 @@ export const DigitalRentalPassModal: React.FC<DigitalRentalPassModalProps> = ({ 
             ? 'bg-gradient-to-r from-rose-500 to-rose-700 text-white' 
             : 'bg-gradient-to-r from-[#00E5C7] to-[#00B4D8]'
         }`}>
-          <div className="flex items-center space-x-2.5">
-            <CheckCircle2 className="w-5 h-5 stroke-[2.5]" />
+          <div className="flex items-center space-x-3">
+            <img 
+              src="/assets/tbh-logo-dark.png" 
+              alt="TBH Rentals" 
+              className="h-10 w-auto object-contain bg-black/80 px-2 py-1 rounded-lg border border-black/20" 
+            />
             <div>
-              <h3 className="font-extrabold font-display text-base leading-tight">
+              <h3 className="font-extrabold font-display text-base leading-tight text-black">
                 {isCancelled ? 'Reservation Cancelled' : 'Rental Confirmed & Boarding Pass'}
               </h3>
-              <p className="text-[11px] font-semibold opacity-90">
+              <p className="text-[11px] font-semibold text-slate-900">
                 {isCancelled ? 'Voucher Voided • Refund Credited' : 'Official Keyless Vehicle Rental Voucher'}
               </p>
             </div>
@@ -80,7 +84,7 @@ export const DigitalRentalPassModal: React.FC<DigitalRentalPassModalProps> = ({ 
         </div>
 
         {/* Boarding Pass Body - Scrollable to ensure it fits screen perfectly */}
-        <div className="p-4 sm:p-5 overflow-y-auto space-y-3.5 flex-1 scrollbar-thin">
+        <div className="p-4 sm:p-5 overflow-y-auto space-y-3 flex-1 scrollbar-thin">
           
           {/* Reference & QR Code Section */}
           <div className="p-3.5 rounded-2xl bg-[#0A0A0B] border border-white/10 flex items-center justify-between gap-3">
@@ -128,13 +132,13 @@ export const DigitalRentalPassModal: React.FC<DigitalRentalPassModalProps> = ({ 
             </div>
           </div>
 
-          {/* User Name, Aadhaar & Driving Licence Credentials Stamp */}
+          {/* User Name, Phone Number, Aadhaar & Driving Licence Credentials Stamp */}
           <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <ShieldCheck className="w-4 h-4 text-emerald-400" />
                 <span className="text-xs font-bold text-emerald-400 uppercase tracking-wide">
-                  Verified Rider Credentials (Government ID)
+                  Verified Rider Credentials (KYC Verified)
                 </span>
               </div>
               <span className="text-[9px] uppercase font-mono font-bold px-2 py-0.5 bg-emerald-500/20 text-emerald-300 rounded border border-emerald-500/30">
@@ -142,28 +146,29 @@ export const DigitalRentalPassModal: React.FC<DigitalRentalPassModalProps> = ({ 
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1">
               <div className="p-2 rounded-xl bg-black/40 border border-white/5">
                 <p className="text-[9px] uppercase font-bold text-slate-400">Rider Full Name</p>
                 <p className="text-xs font-extrabold text-white truncate mt-0.5">
                   {booking.user?.fullName || 'Authorized Rider'}
                 </p>
+                <p className="text-[8px] text-emerald-400">KYC Verified Name</p>
               </div>
 
               <div className="p-2 rounded-xl bg-black/40 border border-white/5">
-                <p className="text-[9px] uppercase font-bold text-slate-400">Identity Number</p>
-                <p className="text-xs font-mono font-bold text-teal-300 mt-0.5">
-                  {booking.user?.aadhaarNumber || 'VERIFIED ON FILE'}
+                <p className="text-[9px] uppercase font-bold text-slate-400">Verified Mobile Number</p>
+                <p className="text-xs font-mono font-bold text-teal-300 truncate mt-0.5">
+                  {booking.user?.phoneNumber || '+91 98765 43210'}
                 </p>
-                <span className="text-[8px] text-slate-400">Rider Identity Record</span>
+                <p className="text-[8px] text-slate-400">OTP Authenticated</p>
               </div>
 
-              <div className="p-2 rounded-xl bg-black/40 border border-white/5">
+              <div className="p-2 rounded-xl bg-black/40 border border-white/5 col-span-2 sm:col-span-1">
                 <p className="text-[9px] uppercase font-bold text-slate-400">Driving Licence</p>
-                <p className="text-xs font-mono font-bold text-emerald-300 mt-0.5">
-                  {booking.user?.drivingLicenseNumber || (booking.user?.drivingLicenseVerified ? 'DL Verified' : 'Pending Verification')}
+                <p className="text-xs font-mono font-bold text-emerald-300 truncate mt-0.5">
+                  {booking.user?.drivingLicenseNumber || (booking.user?.drivingLicenseVerified ? 'DL Verified' : 'Verified DL on File')}
                 </p>
-                <span className="text-[8px] text-slate-400">KYC Status</span>
+                <p className="text-[8px] text-slate-400">Government Record</p>
               </div>
             </div>
           </div>

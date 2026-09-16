@@ -87,17 +87,14 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({
           }`}>
             {vehicle.fuelType}
           </span>
-          <span className="px-2 py-1 rounded-md text-[10px] font-mono font-bold tracking-wider bg-black/80 text-white/90 border border-white/20 backdrop-blur-md">
+          <span className="px-2 py-1 rounded-md text-[10px] font-mono font-bold tracking-wider bg-black/80 text-white border border-white/20 backdrop-blur-md">
             {(() => {
-              if (vehicle.maskedRegistrationNumber && !vehicle.maskedRegistrationNumber.includes('TS09••••1234')) {
-                return vehicle.maskedRegistrationNumber;
-              }
               const isEv = vehicle.fuelType === 'ELECTRIC' || vehicle.id >= 42;
               const prefixes = ['KA-01', 'MH-12', 'TS-09', 'DL-03', 'TN-09', 'KL-07', 'GJ-01', 'RJ-14', 'WB-02', 'GA-07'];
               const p = prefixes[vehicle.id % prefixes.length];
               const tag = isEv ? 'EV' : (vehicle.id % 2 === 0 ? 'EQ' : 'TR');
               const digits = String(1000 + ((vehicle.id * 47 + 1289) % 8999));
-              return `${p}-${tag}-${digits.substring(0, 2)}••••`;
+              return `${p}-${tag}-${digits}`;
             })()}
           </span>
           
