@@ -23,6 +23,25 @@ const PRESET_CONFIGS: Record<ImageKitPreset, ImageTransformOptions> = {
   full: { width: 1920, height: 1080, quality: 90, format: 'auto', cropMode: 'fo-auto' }
 };
 
+const EV_IMAGEKIT_PREFIXES = [
+  '/vehicles/revolt/',
+  '/vehicles/ultraviolette/',
+  '/vehicles/matter/',
+  '/vehicles/oben/',
+  '/vehicles/tork/',
+  '/vehicles/ather/',
+  '/vehicles/ola/',
+  '/vehicles/tvs/iqube/',
+  '/vehicles/bajaj/chetak/',
+  '/vehicles/tata/nexon-ev/',
+  '/vehicles/tata/punch-ev/',
+  '/vehicles/tata/tiago-ev/',
+  '/vehicles/mg/',
+  '/vehicles/mahindra/xuv400/',
+  '/vehicles/byd/',
+  '/vehicles/hyundai/ioniq-5/'
+];
+
 /**
  * Builds an ImageKit CDN URL with optimal real-time transformations.
  */
@@ -31,41 +50,35 @@ export function buildImageKitUrl(pathOrUrl: string, options?: ImageTransformOpti
     return '/images/placeholder-vehicle.webp';
   }
 
-  const opts: ImageTransformOptions = {
-    quality: 80,
-    format: 'auto',
-    cropMode: 'fo-auto',
-    ...options
-  };
-
-  const transformParts: string[] = [];
-  if (opts.width) transformParts.push(`w-${opts.width}`);
-  if (opts.height) transformParts.push(`h-${opts.height}`);
-  if (opts.cropMode) transformParts.push(opts.cropMode);
-  if (opts.quality) transformParts.push(`q-${opts.quality}`);
-  if (opts.format) transformParts.push(`f-${opts.format}`);
-
-  const transformQuery = `tr=${transformParts.join(',')}`;
-
   // If absolute HTTP/HTTPS URL (e.g. BikeDekho, CarDekho, ImageKit), return directly
   if (pathOrUrl.startsWith('http://') || pathOrUrl.startsWith('https://')) {
     return pathOrUrl;
   }
 
-  // If path starts with /vehicles/, resolve directly to ImageKit vehicle storage
-  if (pathOrUrl.startsWith('/vehicles/')) {
+  // If EV path stored on ImageKit CDN, resolve to ImageKit URL
+  const isEvImageKitPath = EV_IMAGEKIT_PREFIXES.some(prefix => pathOrUrl.startsWith(prefix));
+  if (isEvImageKitPath) {
+    const opts: ImageTransformOptions = {
+      quality: 80,
+      format: 'auto',
+      cropMode: 'fo-auto',
+      ...options
+    };
+
+    const transformParts: string[] = [];
+    if (opts.width) transformParts.push(`w-${opts.width}`);
+    if (opts.height) transformParts.push(`h-${opts.height}`);
+    if (opts.cropMode) transformParts.push(opts.cropMode);
+    if (opts.quality) transformParts.push(`q-${opts.quality}`);
+    if (opts.format) transformParts.push(`f-${opts.format}`);
+
+    const transformQuery = `tr=${transformParts.join(',')}`;
     const cleanPath = pathOrUrl.substring('/vehicles/'.length);
     return `${IMAGEKIT_ENDPOINT}/tbh/vehicles/${cleanPath}?${transformQuery}`;
   }
 
-  // If local asset path (e.g. /assets/ or /images/), return local path
-  if (pathOrUrl.startsWith('/assets/') || pathOrUrl.startsWith('/images/') || pathOrUrl.startsWith('http://localhost') || pathOrUrl.startsWith('data:')) {
-    return pathOrUrl;
-  }
-
-  // Otherwise treat as relative path on ImageKit
-  const cleanPath = pathOrUrl.startsWith('/') ? pathOrUrl.substring(1) : pathOrUrl;
-  return `${IMAGEKIT_ENDPOINT}/${cleanPath}?${transformQuery}`;
+  // For all local vehicle assets in public/vehicles/ (Honda, Maruti, Royal Enfield, etc.), return local path
+  return pathOrUrl;
 }
 
 /**
