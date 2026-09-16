@@ -190,32 +190,17 @@ export const Navbar: React.FC<NavbarProps> = ({
           )}
 
           {/* Auth Button or User Menu */}
-          {isClerkSignedIn && isTbhUserLoading ? (
-            <div className="flex items-center space-x-2 px-3.5 py-2 rounded-xl bg-[#141416] border border-[#00E5C7]/40 text-xs text-slate-300 animate-pulse">
-              <RefreshCw className="w-3.5 h-3.5 text-[#00E5C7] animate-spin" />
-              <span className="font-semibold text-white">Syncing Profile...</span>
-            </div>
-          ) : isClerkSignedIn && tbhUserError && !user ? (
-            <button 
-              onClick={refreshUser}
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold hover:bg-amber-500/20 transition"
-              title="Click to retry backend rider profile synchronization"
-            >
-              <AlertCircle className="w-3.5 h-3.5" />
-              <span>Retry Sync</span>
-            </button>
-          ) : isClerkSignedIn && user ? (
-
+          {user ? (
             <div className="relative">
               <button 
                 onClick={() => setShowUserDropdown(!showUserDropdown)}
                 className="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#141416] to-[#1F1F24] border border-[#00E5C7]/30 hover:border-[#00E5C7] transition"
               >
                 <div className="w-7 h-7 rounded-full bg-[#00E5C7]/20 border border-[#00E5C7]/50 flex items-center justify-center text-xs font-bold text-[#00E5C7]">
-                  {user.fullName.charAt(0)}
+                  {user.fullName ? user.fullName.charAt(0) : 'U'}
                 </div>
                 <div className="text-left hidden lg:block">
-                  <p className="text-xs font-semibold text-white leading-tight">{user.fullName.split(' ')[0]}</p>
+                  <p className="text-xs font-semibold text-white leading-tight">{user.fullName ? user.fullName.split(' ')[0] : 'Rider'}</p>
                   <p className="text-[10px] text-[#00E5C7] flex items-center space-x-0.5">
                     <ShieldCheck className="w-2.5 h-2.5" />
                     <span>{user.drivingLicenseVerified ? 'Verified DL' : 'Upload DL'}</span>
@@ -248,7 +233,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF37]" />
                     <span>Driving License & KYC</span>
                   </button>
-                  {(user?.role === 'ROLE_ADMIN' || user?.email?.toLowerCase() === 'tupakulahemanth828@gmail.com') && (
+                  {(user?.role === 'ROLE_ADMIN' || user?.email?.toLowerCase() === 'tupakulahemanth828@gmail.com' || user?.email?.toLowerCase() === 'japanhkt8@gmail.com') && (
                     <button 
                       onClick={() => { onOpenAdmin(); setShowUserDropdown(false); }}
                       className="w-full text-left px-2 py-1.5 rounded-lg text-xs font-bold text-amber-400 hover:bg-amber-500/10 transition flex items-center space-x-2"
@@ -267,6 +252,20 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </div>
               )}
             </div>
+          ) : isClerkSignedIn && isTbhUserLoading ? (
+            <div className="flex items-center space-x-2 px-3.5 py-2 rounded-xl bg-[#141416] border border-[#00E5C7]/40 text-xs text-slate-300 animate-pulse">
+              <RefreshCw className="w-3.5 h-3.5 text-[#00E5C7] animate-spin" />
+              <span className="font-semibold text-white">Syncing Profile...</span>
+            </div>
+          ) : isClerkSignedIn && tbhUserError ? (
+            <button 
+              onClick={refreshUser}
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold hover:bg-amber-500/20 transition"
+              title="Click to retry backend rider profile synchronization"
+            >
+              <AlertCircle className="w-3.5 h-3.5" />
+              <span>Retry Sync</span>
+            </button>
           ) : (
             <div className="flex items-center space-x-2">
               <button 
