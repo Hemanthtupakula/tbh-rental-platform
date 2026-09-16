@@ -79,17 +79,24 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({
 
   // Dynamic State Plate resolution based on selected city identity
   const getCityStatePlate = (cityName: string, id: number) => {
+    // Prefer actual backend registration if assigned to fleet unit
+    const actualReg = vehicle.maskedRegistrationNumber || (vehicle as any).registrationNumber;
+    if (actualReg && typeof actualReg === 'string' && actualReg.trim() !== '') {
+      return actualReg;
+    }
+
     const c = cityName.toUpperCase();
     let state = 'KA';
-    if (c.includes('HYDERABAD') || c.includes('TELANGANA')) state = 'TS';
-    else if (c.includes('CHENNAI') || c.includes('TAMIL')) state = 'TN';
-    else if (c.includes('MUMBAI') || c.includes('PUNE') || c.includes('MAHARASHTRA')) state = 'MH';
-    else if (c.includes('DELHI') || c.includes('NCR')) state = 'DL';
-    else if (c.includes('KOLKATA') || c.includes('BENGAL')) state = 'WB';
-    else if (c.includes('GOA')) state = 'GA';
-    else if (c.includes('JAIPUR') || c.includes('RAJASTHAN')) state = 'RJ';
-    else if (c.includes('AHMEDABAD') || c.includes('GUJARAT')) state = 'GJ';
-    else if (c.includes('KOCHI') || c.includes('KERALA')) state = 'KL';
+    if (c.includes('HYDERABAD') || c.includes('TELANGANA') || c === 'TG' || c === 'TS') state = 'TS';
+    else if (c.includes('CHENNAI') || c.includes('TAMIL') || c === 'TN') state = 'TN';
+    else if (c.includes('MUMBAI') || c.includes('PUNE') || c.includes('MAHARASHTRA') || c === 'MH') state = 'MH';
+    else if (c.includes('DELHI') || c.includes('NCR') || c === 'DL') state = 'DL';
+    else if (c.includes('KOLKATA') || c.includes('WEST BENGAL') || c === 'WB') state = 'WB';
+    else if (c.includes('GOA') || c === 'GA') state = 'GA';
+    else if (c.includes('JAIPUR') || c.includes('RAJASTHAN') || c === 'RJ') state = 'RJ';
+    else if (c.includes('AHMEDABAD') || c.includes('GUJARAT') || c === 'GJ') state = 'GJ';
+    else if (c.includes('KOCHI') || c.includes('KERALA') || c === 'KL') state = 'KL';
+    else if (c.includes('BENGALURU') || c.includes('BANGALORE') || c.includes('KARNATAKA') || c === 'KA') state = 'KA';
 
     const isEv = vehicle.fuelType === 'ELECTRIC' || id >= 42;
     const tag = isEv ? 'EV' : (id % 2 === 0 ? 'EQ' : 'TR');
@@ -131,11 +138,11 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({
         <div className="absolute inset-0 bg-gradient-to-t from-[#141416] via-transparent to-black/40" />
 
         {/* Category & Availability Badges */}
-        <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 items-center">
-          <span className="px-2.5 py-1 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-[#0A0A0B]/80 text-[#00E5C7] border border-[#00E5C7]/30 backdrop-blur-md">
+        <div className="absolute top-3 left-3 right-12 flex flex-wrap gap-1.5 items-center">
+          <span className="px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-wider bg-[#0A0A0B]/85 text-[#00E5C7] border border-[#00E5C7]/30 backdrop-blur-md">
             {vehicle.category ? vehicle.category.replace(/_/g, ' ') : vehicle.vehicleType.replace(/_/g, ' ')}
           </span>
-          <span className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider backdrop-blur-md ${
+          <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider backdrop-blur-md ${
             vehicle.fuelType === 'ELECTRIC' 
               ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' 
               : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
@@ -144,28 +151,28 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({
           </span>
           
           {/* Dynamic Registration Plate matching selected city */}
-          <span className="px-2 py-1 rounded-md text-[10px] font-mono font-bold tracking-wider bg-black/80 text-white border border-white/20 backdrop-blur-md">
+          <span className="px-2 py-0.5 rounded-md text-[9px] font-mono font-bold tracking-wider bg-black/85 text-slate-100 border border-white/20 backdrop-blur-md">
             {getCityStatePlate(selectedCity, vehicle.id)}
           </span>
           
-          {/* Availability Status Badge */}
+          {/* Fleet Availability Status Badge */}
           {!isAvailable ? (
-            <span className="px-2 py-1 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-rose-500/90 text-white border border-rose-400 backdrop-blur-md flex items-center space-x-1">
-              <AlertCircle className="w-3 h-3 inline mr-1" />
+            <span className="px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-wider bg-rose-500/90 text-white border border-rose-400 backdrop-blur-md flex items-center space-x-1">
+              <AlertCircle className="w-2.5 h-2.5 inline mr-0.5" />
               UNAVAILABLE
             </span>
           ) : (
-            <span className="px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 backdrop-blur-md flex items-center space-x-1">
-              <CheckCircle2 className="w-3 h-3 inline mr-1" />
+            <span className="px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 backdrop-blur-md flex items-center space-x-1">
+              <CheckCircle2 className="w-2.5 h-2.5 inline mr-0.5" />
               {formattedStockText()}
             </span>
           )}
 
-          {/* Photography Status Badge */}
-          <span className={`px-2 py-1 rounded-md text-[10px] font-semibold backdrop-blur-md ${
+          {/* Secondary Photography Indicator */}
+          <span className={`px-2 py-0.5 rounded-md text-[9px] font-medium backdrop-blur-md ${
             isPhotoAvailable 
-              ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' 
-              : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
+              ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/30' 
+              : 'bg-black/80 text-amber-300 border border-amber-500/30'
           }`}>
             {isPhotoAvailable ? 'Photo Available' : 'Photography Pending'}
           </span>
@@ -212,20 +219,27 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({
           <h4 className="text-lg font-bold text-white font-display leading-snug">{vehicle.name}</h4>
           <p className="text-xs text-[#00E5C7] font-medium">{vehicle.variant || vehicle.model}</p>
           {colourVariants && colourVariants.length > 0 && (
-            <div className="mt-2.5 p-2 bg-white/[0.03] rounded-lg border border-white/5 space-y-1.5">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-semibold text-slate-400">
-                  Shade: <span className="text-white font-bold">{currentColour?.name}</span>
-                </span>
-                <span className="text-[9px] font-mono text-slate-400">
+            <div className="mt-2.5 p-2.5 bg-[#141416]/90 rounded-xl border border-white/10 space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center space-x-1.5 min-w-0 pr-2">
+                  <span className="text-slate-400 text-[10px] font-medium shrink-0">Shade:</span>
+                  <span className="text-white font-bold text-xs truncate">{currentColour?.name}</span>
+                </div>
+                <div className="shrink-0 text-[10px] font-medium">
                   {isPhotoAvailable ? (
-                    <span className="text-emerald-400 font-medium">● Verified Photo</span>
+                    <span className="text-emerald-400 font-semibold flex items-center space-x-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse" />
+                      <span>Verified Photo</span>
+                    </span>
                   ) : (
-                    <span className="text-amber-400 font-medium">● Pending</span>
+                    <span className="text-amber-400/90 font-semibold flex items-center space-x-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block" />
+                      <span>Available at Fleet • Photo Pending</span>
+                    </span>
                   )}
-                </span>
+                </div>
               </div>
-              <div className="flex items-center space-x-1.5 flex-wrap gap-y-1">
+              <div className="flex items-center space-x-2 flex-wrap gap-y-1">
                 {colourVariants.map((c, i) => {
                   const isSelected = i === selectedColourIndex;
                   return (
@@ -241,15 +255,12 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({
                           ? 'ring-2 ring-[#00E5C7] ring-offset-2 ring-offset-[#141416] scale-110 z-10' 
                           : 'hover:scale-105 opacity-70 hover:opacity-100'
                       }`}
-                      title={`${c.name} (${c.photoStatus === 'AVAILABLE' ? 'Photo Available' : 'Photography Pending'})`}
+                      title={`${c.name} (${c.photoStatus === 'AVAILABLE' ? 'Photo Available' : 'Available at Fleet • Photography Pending'})`}
                     >
                       <div
                         className="w-4 h-4 rounded-full border border-white/40 shadow-sm"
                         style={{ backgroundColor: c.hex }}
                       />
-                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover:block z-20 whitespace-nowrap bg-black/90 text-white text-[10px] px-2 py-0.5 rounded shadow-lg border border-white/20 pointer-events-none">
-                        {c.name} {c.photoStatus !== 'AVAILABLE' && '(Pending)'}
-                      </div>
                     </button>
                   );
                 })}

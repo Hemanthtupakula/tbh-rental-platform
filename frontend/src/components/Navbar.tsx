@@ -110,18 +110,6 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Right Controls */}
         <div className="flex items-center space-x-2 sm:space-x-2.5">
-          {/* Theme Switcher */}
-          <button 
-            onClick={toggleTheme}
-            title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-            className="flex items-center justify-center w-8 h-8 rounded-xl bg-[#141416] border border-white/10 hover:border-white/20 text-slate-300 transition"
-          >
-            {theme === 'dark' ? (
-              <Sun className="w-4 h-4 text-amber-400" />
-            ) : (
-              <Moon className="w-4 h-4 text-teal-400" />
-            )}
-          </button>
 
           {/* Driving Licence KYC Status Button */}
           <button
