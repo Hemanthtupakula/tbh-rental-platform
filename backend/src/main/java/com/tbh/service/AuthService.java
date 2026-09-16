@@ -10,6 +10,7 @@ import com.tbh.repository.UserRepository;
 import com.tbh.security.JwtTokenProvider;
 import com.tbh.service.email.EmailService;
 import com.tbh.service.otp.OtpProvider;
+import com.tbh.service.otp.OtpSendResult;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.tbh.service.kyc.KycVerificationResult;
@@ -20,6 +21,7 @@ import java.time.LocalDate;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -34,18 +36,26 @@ public class AuthService {
     private final KycVerificationService kycVerificationService;
 
     public static class OtpSession {
-        private final String code;
+        private final String providerMessageId;
+        private final String devCode;
         private final Instant expiresAt;
         private final Instant createdAt;
         private int attempts = 0;
 
-        public OtpSession(String code, Instant expiresAt) {
-            this.code = code;
+        public OtpSession(String providerMessageId, String devCode, Instant expiresAt) {
+            this.providerMessageId = providerMessageId;
+            this.devCode = devCode;
             this.expiresAt = expiresAt;
             this.createdAt = Instant.now();
         }
 
-        public String getCode() { return code; }
+        public OtpSession(String code, Instant expiresAt) {
+            this(code, code, expiresAt);
+        }
+
+        public String getProviderMessageId() { return providerMessageId; }
+        public String getDevCode() { return devCode; }
+        public String getCode() { return devCode != null ? devCode : providerMessageId; }
         public boolean isExpired() { return Instant.now().isAfter(expiresAt); }
         public boolean canResend() { return Instant.now().isAfter(createdAt.plusSeconds(60)); }
         public int incrementAttempts() { return ++attempts; }
@@ -135,73 +145,101 @@ public class AuthService {
             throw new IllegalArgumentException("Please provide a valid 10-digit Indian mobile number.");
         }
 
-        int randomPin = 100000 + secureRandom.nextInt(900000);
-        String otpCode = String.valueOf(randomPin);
+        OtpSession existing = otpStorage.get(sanitizedPhone);
+        if (existing != null && !existing.canResend()) {
+            throw new IllegalArgumentException("Please wait 60 seconds before requesting another OTP.");
+        }
+
+        OtpSendResult result = otpProvider.sendOtp(phoneNumber);
+        if (!result.success()) {
+            throw new IllegalStateException(result.message() != null ? result.message() : "Failed to dispatch WhatsApp OTP.");
+        }
 
         Instant expiresAt = Instant.now().plusSeconds(300);
-        otpStorage.put(sanitizedPhone, new OtpSession(otpCode, expiresAt));
+        otpStorage.put(sanitizedPhone, new OtpSession(result.providerMessageId(), result.devOtp(), expiresAt));
 
-        try {
-            otpProvider.sendOtp(sanitizedPhone, otpCode);
-        } catch (Exception e) {
-            System.err.println("[OTP ERROR] Failed to send via provider, fallback to code: " + otpCode + " -> " + e.getMessage());
-        }
-        return otpCode;
+        return result.devOtp();
     }
 
     public AuthResponse verifyOtp(String phoneNumber, String otp) {
+        return verifyOtp(phoneNumber, otp, null);
+    }
+
+    public AuthResponse verifyOtp(String phoneNumber, String otp, org.springframework.security.core.Authentication authentication) {
         String sanitizedPhone = sanitizePhone(phoneNumber);
         OtpSession session = otpStorage.get(sanitizedPhone);
         String cleanOtp = otp != null ? otp.trim() : "";
 
-        boolean isMasterOtp = "123456".equals(cleanOtp) || "999999".equals(cleanOtp) || "888888".equals(cleanOtp);
+        if (session == null) {
+            throw new IllegalArgumentException("No active OTP request found. Please request a new OTP.");
+        }
 
-        if (!isMasterOtp) {
-            if (session == null) {
-                throw new IllegalArgumentException("No active OTP found. Please request a new OTP.");
-            }
+        if (session.isExpired()) {
+            otpStorage.remove(sanitizedPhone);
+            throw new IllegalArgumentException("OTP has expired. Please request a new OTP.");
+        }
 
-            if (session.isExpired()) {
+        if (session.getAttempts() >= 3) {
+            otpStorage.remove(sanitizedPhone);
+            throw new IllegalArgumentException("Maximum verification attempts exceeded. Please request a new OTP.");
+        }
+
+        boolean verified = false;
+        if (session.getDevCode() != null && session.getDevCode().equals(cleanOtp)) {
+            verified = true;
+        } else {
+            verified = otpProvider.verifyOtp(session.getProviderMessageId(), cleanOtp);
+        }
+
+        if (!verified) {
+            int attempts = session.incrementAttempts();
+            int remaining = 3 - attempts;
+            if (remaining <= 0) {
                 otpStorage.remove(sanitizedPhone);
-                throw new IllegalArgumentException("OTP has expired. Please request a new OTP.");
+                throw new IllegalArgumentException("Maximum attempts exceeded. Please request a new OTP.");
             }
-
-            if (session.getAttempts() >= 3) {
-                otpStorage.remove(sanitizedPhone);
-                throw new IllegalArgumentException("Maximum verification attempts exceeded. Please request a new OTP.");
-            }
-
-            if (!session.getCode().equals(cleanOtp)) {
-                int attempts = session.incrementAttempts();
-                int remaining = 3 - attempts;
-                if (remaining <= 0) {
-                    otpStorage.remove(sanitizedPhone);
-                    throw new IllegalArgumentException("Maximum attempts exceeded. Please request a new OTP.");
-                }
-                throw new IllegalArgumentException("Incorrect OTP. " + remaining + " attempts remaining.");
-            }
+            throw new IllegalArgumentException("Incorrect or expired WhatsApp OTP. " + remaining + " attempts remaining.");
         }
 
         otpStorage.remove(sanitizedPhone);
 
-        User user = userRepository.findByPhoneNumber(sanitizedPhone)
-                .orElseGet(() -> {
-                    String defaultEmail = "rider_" + sanitizedPhone + "@tbhrentals.in";
-                    Role role = isAdminEmail(defaultEmail) ? Role.ROLE_ADMIN : Role.ROLE_USER;
-                    User newUser = new User(
-                            "TBH Rider " + sanitizedPhone.substring(Math.max(0, sanitizedPhone.length() - 4)),
-                            defaultEmail,
-                            sanitizedPhone,
-                            passwordEncoder.encode("OTP_AUTH_" + secureRandom.nextLong()),
-                            role
-                    );
-                    return newUser;
-                });
+        User user = null;
+        if (authentication != null && authentication.isAuthenticated() && authentication.getName() != null) {
+            String authName = authentication.getName();
+            Optional<User> byEmail = userRepository.findByEmail(authName);
+            if (byEmail.isPresent()) {
+                user = byEmail.get();
+            } else {
+                Optional<User> byClerk = userRepository.findByClerkUserId(authName);
+                if (byClerk.isPresent()) {
+                    user = byClerk.get();
+                }
+            }
+        }
+
+        if (user == null) {
+            user = userRepository.findByPhoneNumber(sanitizedPhone)
+                    .orElseGet(() -> {
+                        String defaultEmail = "rider_" + sanitizedPhone + "@tbhrentals.in";
+                        Role role = isAdminEmail(defaultEmail) ? Role.ROLE_ADMIN : Role.ROLE_USER;
+                        return new User(
+                                "TBH Rider " + sanitizedPhone.substring(Math.max(0, sanitizedPhone.length() - 4)),
+                                defaultEmail,
+                                sanitizedPhone,
+                                passwordEncoder.encode("OTP_AUTH_" + secureRandom.nextLong()),
+                                role
+                        );
+                    });
+        }
 
         user.setMobileVerified(true);
+        if (user.getPhoneNumber() == null || user.getPhoneNumber().isBlank() || !user.getPhoneNumber().contains(sanitizedPhone)) {
+            user.setPhoneNumber(sanitizedPhone);
+        }
         if (isAdminEmail(user.getEmail()) && user.getRole() != Role.ROLE_ADMIN) {
             user.setRole(Role.ROLE_ADMIN);
         }
+
         user = userRepository.save(user);
 
         String token = tokenProvider.generateToken(user.getId(), user.getEmail(), user.getRole().name());

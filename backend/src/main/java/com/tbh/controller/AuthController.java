@@ -78,25 +78,25 @@ public class AuthController {
     @PostMapping("/send-otp")
     public ResponseEntity<?> sendOtp(@RequestBody OtpRequest request) {
         try {
-            String otpCode = authService.sendOtp(request.getPhoneNumber());
+            String devOtp = authService.sendOtp(request.getPhoneNumber());
             Map<String, Object> resp = new HashMap<>();
-            resp.put("message", "OTP sent successfully to " + request.getPhoneNumber());
+            resp.put("message", "WhatsApp OTP sent successfully to " + request.getPhoneNumber());
             resp.put("expiresInSeconds", 300);
-            if ("mock".equalsIgnoreCase(otpProvider)) {
-                resp.put("devOtp", otpCode);
+            if ("mock".equalsIgnoreCase(otpProvider) && devOtp != null) {
+                resp.put("devOtp", devOtp);
             }
             return ResponseEntity.ok(resp);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(Map.of("message", "Failed to send OTP. Please try again later."));
+            return ResponseEntity.internalServerError().body(Map.of("message", e.getMessage() != null ? e.getMessage() : "Failed to send WhatsApp OTP. Please try again later."));
         }
     }
 
     @PostMapping("/verify-otp")
-    public ResponseEntity<?> verifyOtp(@RequestBody OtpRequest request) {
+    public ResponseEntity<?> verifyOtp(@RequestBody OtpRequest request, org.springframework.security.core.Authentication authentication) {
         try {
-            AuthResponse response = authService.verifyOtp(request.getPhoneNumber(), request.getOtp());
+            AuthResponse response = authService.verifyOtp(request.getPhoneNumber(), request.getOtp(), authentication);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));

@@ -13,6 +13,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,6 +39,7 @@ public class SmsOtpProvider implements OtpProvider {
 
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
+    private final SecureRandom random = new SecureRandom();
 
     public SmsOtpProvider() {
         this.httpClient = HttpClient.newBuilder()
@@ -47,24 +49,27 @@ public class SmsOtpProvider implements OtpProvider {
     }
 
     @Override
-    public void sendOtp(String phoneNumber, String otpCode) {
+    public OtpSendResult sendOtp(String phoneNumber) {
         String sanitizedPhone = sanitizePhoneNumber(phoneNumber);
         String maskedPhone = maskPhoneNumber(sanitizedPhone);
 
         if (apiKey == null || apiKey.trim().isEmpty()) {
-            log.error("[FAST2SMS] SMS dispatch failed: 'tbh.sms.api-key' is not configured. Set TBH_SMS_API_KEY in .env.");
-            throw new IllegalStateException("SMS gateway not configured: Missing API key. Use TBH_OTP_PROVIDER=mock for local development.");
+            log.error("[FAST2SMS] SMS dispatch failed: Missing API Key.");
+            return OtpSendResult.failure("SMS gateway not configured: Missing API key.");
         }
 
         if (sanitizedPhone.length() != 10) {
             log.warn("[FAST2SMS] Rejected dispatch: Phone number {} is not a valid 10-digit Indian mobile number", maskedPhone);
-            throw new IllegalArgumentException("Invalid Indian mobile number. Exactly 10 digits required.");
+            return OtpSendResult.failure("Invalid Indian mobile number. Exactly 10 digits required.");
         }
+
+        int codeInt = 100000 + random.nextInt(900000);
+        String otpCode = String.valueOf(codeInt);
+        String msgId = "SMS_MSG_" + System.currentTimeMillis() + "_" + otpCode;
 
         log.info("[FAST2SMS] Dispatching OTP via route '{}' to recipient {}", route, maskedPhone);
 
         try {
-            // Build Fast2SMS JSON payload
             Map<String, Object> payload = new HashMap<>();
             payload.put("numbers", sanitizedPhone);
 
@@ -74,7 +79,6 @@ public class SmsOtpProvider implements OtpProvider {
                 payload.put("message", dltTemplateId);
                 payload.put("variables_values", otpCode);
             } else {
-                // Default Quick OTP route (Standard pre-approved OTP template in Fast2SMS)
                 payload.put("route", "otp");
                 payload.put("variables_values", otpCode);
             }
@@ -93,7 +97,6 @@ public class SmsOtpProvider implements OtpProvider {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             String responseBody = response.body() != null ? response.body() : "";
 
-            // Evaluate Fast2SMS response without exposing the OTP code in logs
             boolean isSuccessful = false;
             String gatewayMessage = "No response message";
 
@@ -114,22 +117,32 @@ public class SmsOtpProvider implements OtpProvider {
             }
 
             if (response.statusCode() == 200 && isSuccessful) {
-                log.info("[FAST2SMS] OTP successfully accepted by gateway for recipient {} (HTTP {})",
-                        maskedPhone, response.statusCode());
+                log.info("[FAST2SMS] OTP successfully accepted by gateway for recipient {}", maskedPhone);
+                return OtpSendResult.success(msgId, "SMS OTP dispatched successfully");
             } else {
                 log.error("[FAST2SMS] Gateway delivery failure for recipient {}: HTTP status {}, gateway response: {}",
                         maskedPhone, response.statusCode(), gatewayMessage);
-                throw new IllegalStateException("SMS delivery failure: " + gatewayMessage);
+                return OtpSendResult.failure("SMS delivery failure: " + gatewayMessage);
             }
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("[FAST2SMS] I/O failure while contacting gateway for recipient {}: {}", maskedPhone, e.getMessage());
-            throw new IllegalStateException("Failed to communicate with SMS carrier gateway.");
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            log.error("[FAST2SMS] SMS dispatch thread interrupted for recipient {}", maskedPhone);
-            throw new IllegalStateException("SMS dispatch request timed out or interrupted.");
+            return OtpSendResult.failure("Failed to communicate with SMS carrier gateway.");
         }
+    }
+
+    @Override
+    public boolean verifyOtp(String providerMessageId, String code) {
+        if (providerMessageId == null || code == null) return false;
+        String cleanCode = code.trim();
+        if (providerMessageId.startsWith("SMS_MSG_")) {
+            String[] parts = providerMessageId.split("_");
+            if (parts.length >= 4) {
+                String expectedOtp = parts[3];
+                return expectedOtp.equals(cleanCode);
+            }
+        }
+        return false;
     }
 
     private String sanitizePhoneNumber(String phone) {
