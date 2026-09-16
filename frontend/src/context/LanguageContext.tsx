@@ -1,11 +1,11 @@
-﻿import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
 type Lang = 'EN' | 'HI';
 
 const DICTIONARY = {
   EN: {
     tagline: "Ride Beyond Limits",
-    heroTitle: "India's Most Elite Mobility Fleet",
+    heroTitle: "India's Premium Self-Drive Fleet",
     heroSubtitle: "Superbikes. Iconic Cruisers. Electric Velocity. 4x4 Off-Road Legends.",
     searchBarTitle: "Find Your Machine",
     pickupCity: "Pickup City",

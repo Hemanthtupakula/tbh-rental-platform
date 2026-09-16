@@ -198,17 +198,10 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({
           </button>
         </div>
 
-        {/* Ratings & Reviews */}
-        <div className="absolute bottom-3 left-3 flex items-center space-x-1 text-xs font-semibold text-white bg-black/70 px-2.5 py-1 rounded-md backdrop-blur-md border border-white/10">
-          {vehicle.rating && vehicle.rating > 0 ? (
-            <>
-              <Star className="w-3.5 h-3.5 text-[#D4AF37] fill-[#D4AF37]" />
-              <span>{vehicle.rating.toFixed(1)}</span>
-              <span className="text-slate-400 text-[10px]">({vehicle.reviewCount || 1} verified)</span>
-            </>
-          ) : (
-            <span className="text-slate-300 text-[10px] italic">Verified Rental</span>
-          )}
+        {/* Commercial Fleet Badge */}
+        <div className="absolute bottom-3 left-3 flex items-center space-x-1.5 text-xs font-semibold text-white bg-black/80 px-2.5 py-1 rounded-md backdrop-blur-md border border-white/15">
+          <Shield className="w-3.5 h-3.5 text-[#00E5C7]" />
+          <span className="text-slate-200 text-[10px] font-medium tracking-wide">Commercial Fleet</span>
         </div>
       </div>
 

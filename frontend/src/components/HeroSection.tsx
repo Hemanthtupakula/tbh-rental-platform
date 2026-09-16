@@ -73,7 +73,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </h1>
 
             <p className="text-base sm:text-lg text-slate-300 max-w-xl font-normal leading-relaxed">
-              {t('heroSubtitle')} Experience India's roads with instant digital booking, transparent INR rates, and zero security deposit options.
+              {t('heroSubtitle')} Premium self-drive rentals with instant digital keyless access, full commercial insurance, and transparent pricing.
             </p>
 
             {/* Quick Metrics Bar */}
@@ -87,8 +87,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 <p className="text-[11px] text-slate-400">Bikes, Scooters, EVs, SUVs</p>
               </div>
               <div className="p-3 rounded-xl bg-[#141416]/80 border border-white/10">
-                <p className="text-xl font-bold font-display text-[#D4AF37]">4.96 ★</p>
-                <p className="text-[11px] text-slate-400">120,000+ Trips</p>
+                <p className="text-xl font-bold font-display text-[#D4AF37]">Instant PIN</p>
+                <p className="text-[11px] text-slate-400">Keyless Hub Unlock</p>
               </div>
             </div>
 
