@@ -79,11 +79,48 @@ export const Footer: React.FC<FooterProps> = ({ onOpenInfoModal }) => {
 
         </div>
 
-        {/* Bottom copyright & Info Modal links */}
-        <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-4">
-          <p>© 2026 TBH Mobility Technologies Pvt. Ltd. All rights reserved.</p>
-          
-          <div className="flex flex-wrap items-center gap-4 text-xs">
+        {/* Automotive End-of-Journey Brand Signature Section */}
+        <div className="pt-12 pb-8 border-t border-b border-white/10 my-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
+            
+            {/* Left Main Signature Statement */}
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2 text-[10px] font-mono tracking-widest text-[#00E5C7] uppercase font-bold">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#00E5C7]" />
+                <span>TBH AUTOMOTIVE SIGNATURE</span>
+                <span className="text-slate-600">•</span>
+                <span className="text-slate-400 font-mono text-[9px] uppercase tracking-widest">HKT • HKT • HKT</span>
+              </div>
+
+              <h2 className="text-3xl sm:text-5xl font-black font-display tracking-tight text-white uppercase leading-none">
+                BUILT FOR <br className="hidden sm:inline" />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FFFFFF] via-[#00E5C7] to-[#D4AF37]">
+                  INDIA'S ROADS.
+                </span>
+              </h2>
+
+              <p className="text-xs text-slate-400 font-medium tracking-wide">
+                Engineered for Indian highways, city commutes, and coastal drives. <strong className="text-white font-display uppercase tracking-widest">RIDE BEYOND LIMITS</strong>
+              </p>
+            </div>
+
+            {/* Right Editorial Side Signature Element with Micro HKT Stamps */}
+            <div className="flex items-center space-x-4 pl-0 md:pl-6 border-l-0 md:border-l border-white/10 flex-shrink-0">
+              <div className="flex flex-col text-right font-mono text-[9px] text-slate-500 uppercase tracking-widest space-y-1 select-none">
+                <span className="text-[#00E5C7] font-bold">HKT-SPEC</span>
+                <span>VERIFIED • 2026</span>
+                <span>IND-HUB • 500+</span>
+                <span className="text-[#D4AF37] font-bold">HKT • TBH</span>
+              </div>
+              <div className="w-1 h-12 rounded-full bg-gradient-to-b from-[#00E5C7] via-[#D4AF37] to-transparent opacity-75" />
+            </div>
+
+          </div>
+        </div>
+
+        {/* Bottom Info Modal links (NO COPYRIGHT LINE) */}
+        <div className="flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-4 pt-2">
+          <div className="flex flex-wrap items-center gap-6 text-xs font-semibold">
             <button 
               onClick={() => onOpenInfoModal && onOpenInfoModal('TERMS')}
               className="hover:text-[#00E5C7] transition"
@@ -114,9 +151,10 @@ export const Footer: React.FC<FooterProps> = ({ onOpenInfoModal }) => {
             >
               About TBH
             </button>
-            <div className="text-[#00E5C7] font-bold tracking-wider flex items-center space-x-1 pl-2 border-l border-white/15">
-              <span>BUILT FOR INDIA'S ROADS.</span>
-            </div>
+          </div>
+
+          <div className="text-[10px] font-mono text-slate-500 tracking-widest uppercase">
+            HKT • TBH MOBILITY
           </div>
         </div>
 

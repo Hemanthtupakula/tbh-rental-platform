@@ -161,21 +161,32 @@ input::placeholder, textarea::placeholder {
   border-radius: 10px !important;
 }
 
-/* Light Mode Luxury Palette & Font Contrast Fixes */
+/* Light Mode Editorial Automotive Design System */
 html.light body {
+  background-color: #F1F4F7 !important;
+  color: #111827 !important;
+}
+
+html.light footer {
+  background-color: #EBF0F5 !important;
+  border-top-color: #D5DDE5 !important;
+}
+
+html.light header {
   background-color: #F8FAFC !important;
-  color: #0F172A !important;
+  border-bottom-color: #D5DDE5 !important;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05) !important;
 }
 
 html.light .glass-panel {
-  background: rgba(255, 255, 255, 0.96) !important;
-  border: 1px solid #CBD5E1 !important;
-  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08) !important;
+  background: #FFFFFF !important;
+  border: 1px solid #D5DDE5 !important;
+  box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.04) !important;
 }
 
 html.light .glass-panel-hover:hover {
-  border-color: rgba(0, 180, 150, 0.5) !important;
-  box-shadow: 0 15px 35px -10px rgba(0, 180, 150, 0.25) !important;
+  border-color: rgba(0, 205, 184, 0.6) !important;
+  box-shadow: 0 14px 30px -8px rgba(0, 205, 184, 0.18) !important;
 }
 
 html.light .bg-\[\#141416\],
@@ -183,19 +194,26 @@ html.light .bg-\[\#0A0A0B\],
 html.light .bg-\[\#1E1E24\],
 html.light .bg-\[\#18181B\] {
   background-color: #FFFFFF !important;
-  color: #0F172A !important;
+  color: #111827 !important;
+  border-color: #D5DDE5 !important;
 }
 
 html.light .bg-\[\#0A0A0B\]\/60,
 html.light .bg-\[\#0A0A0B\]\/80,
 html.light .bg-\[\#0A0A0B\]\/70,
 html.light .bg-\[\#0A0A0B\]\/90,
+html.light .bg-\[\#0A0A0B\]\/85,
 html.light .bg-\[\#0A0A0B\]\/50,
 html.light .bg-black\/40,
 html.light .bg-black\/60,
-html.light .bg-black\/80 {
-  background-color: #F1F5F9 !important;
-  color: #0F172A !important;
+html.light .bg-black\/70,
+html.light .bg-black\/80,
+html.light .bg-black\/85,
+html.light .bg-black\/90,
+html.light .bg-black\/95 {
+  background-color: #F7F9FB !important;
+  color: #111827 !important;
+  border-color: #D5DDE5 !important;
 }
 
 html.light .bg-gradient-to-br,
@@ -203,7 +221,7 @@ html.light .bg-gradient-to-r,
 html.light .from-\[\#0A0A0B\],
 html.light .from-\[\#141416\] {
   background: #FFFFFF !important;
-  color: #0F172A !important;
+  color: #111827 !important;
 }
 
 html.light h1.text-white,
@@ -213,8 +231,10 @@ html.light h4.text-white,
 html.light p.text-white,
 html.light span.text-white,
 html.light label.text-white,
-html.light div.text-white {
-  color: #0F172A !important;
+html.light div.text-white,
+html.light a.text-white,
+html.light button.text-white {
+  color: #111827 !important;
 }
 
 html.light .text-slate-200,
@@ -230,24 +250,25 @@ html.light .text-slate-500 {
 html.light .border-white\/10,
 html.light .border-white\/5,
 html.light .border-white\/15,
-html.light .border-white\/20 {
-  border-color: #CBD5E1 !important;
+html.light .border-white\/20,
+html.light .border-white\/30 {
+  border-color: #D5DDE5 !important;
 }
 
 html.light select,
 html.light input:not(.cl-otpInputInput) {
   background-color: #FFFFFF !important;
-  color: #0F172A !important;
-  border-color: #CBD5E1 !important;
+  color: #111827 !important;
+  border-color: #D5DDE5 !important;
 }
 
 html.light select option {
   background-color: #FFFFFF !important;
-  color: #0F172A !important;
+  color: #111827 !important;
 }
 
 html.light ::-webkit-scrollbar-track {
-  background: #F1F5F9;
+  background: #F1F4F7;
 }
 
 html.light ::-webkit-scrollbar-thumb {
