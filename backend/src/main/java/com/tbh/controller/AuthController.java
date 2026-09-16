@@ -21,6 +21,7 @@ import org.springframework.security.core.Authentication;
 public class AuthController {
 
     private final AuthService authService;
+    private final com.tbh.service.email.EmailService emailService;
 
     @Value("${tbh.otp.provider:mock}")
     private String otpProvider;
@@ -28,8 +29,10 @@ public class AuthController {
     @Value("${tbh.email.provider:mock}")
     private String emailProvider;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService,
+                          @org.springframework.beans.factory.annotation.Autowired(required = false) com.tbh.service.email.EmailService emailService) {
         this.authService = authService;
+        this.emailService = emailService;
     }
 
     @PostMapping("/register")
@@ -97,6 +100,11 @@ public class AuthController {
     public ResponseEntity<?> verifyOtp(@RequestBody OtpRequest request, org.springframework.security.core.Authentication authentication) {
         try {
             AuthResponse response = authService.verifyOtp(request.getPhoneNumber(), request.getOtp(), authentication);
+            if (emailService != null && response != null && response.getEmail() != null) {
+                try {
+                    emailService.queueMobileVerificationCompleted(response.getEmail(), response.getFullName());
+                } catch (Exception ignored) {}
+            }
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
@@ -189,6 +197,11 @@ public class AuthController {
                     aadhaarNumber,
                     phoneNumber
             );
+            if (emailService != null && response != null && response.getEmail() != null) {
+                try {
+                    emailService.queueProfileUpdated(response.getEmail(), response.getFullName());
+                } catch (Exception ignored) {}
+            }
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));

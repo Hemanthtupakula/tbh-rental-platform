@@ -32,21 +32,24 @@ public class ResendEmailClient {
     }
 
     public String sendEmail(String recipientEmail, String subject, String htmlContent) {
+        String apiKey = resendConfig.getApiKey();
         String provider = resendConfig.getProvider();
         boolean isProd = resendConfig.isProduction();
 
-        if ("resend".equalsIgnoreCase(provider)) {
-            String apiKey = resendConfig.getApiKey();
+        // If API key is present or provider is explicitly 'resend', execute real API call
+        if ((apiKey != null && !apiKey.trim().isEmpty()) || "resend".equalsIgnoreCase(provider)) {
             if (apiKey == null || apiKey.trim().isEmpty()) {
                 if (isProd) {
                     throw new IllegalStateException("CRITICAL PRODUCTION CONFIGURATION ERROR: RESEND_API_KEY is required in production when provider=resend. Email cannot be dispatched.");
                 } else {
-                    log.warn("[RESEND CLIENT DEV] Missing RESEND_API_KEY in dev mode. Recording mock delivery for {}", recipientEmail);
+                    log.warn("[RESEND API -> MOCK DEV] Missing RESEND_API_KEY in dev mode. Recording mock delivery for {}", recipientEmail);
                     return "mock_dev_" + UUID.randomUUID();
                 }
             }
 
             try {
+                log.info("[RESEND API -> DISPATCH] Recipient: {} | Subject: '{}' | From: {}", recipientEmail, subject, resendConfig.getFromEmail());
+
                 Map<String, Object> payload = new HashMap<>();
                 payload.put("from", resendConfig.getFromEmail());
                 payload.put("to", Collections.singletonList(recipientEmail));
@@ -67,22 +70,21 @@ public class ResendEmailClient {
                 if (response.statusCode() >= 200 && response.statusCode() < 300) {
                     JsonNode root = objectMapper.readTree(response.body());
                     String resendId = root.path("id").asText("resend_sent_" + UUID.randomUUID());
-                    log.info("[RESEND CLIENT] Successfully dispatched email to {} with Resend ID {}", recipientEmail, resendId);
+                    log.info("[RESEND API -> RESULT] SUCCESS HTTP {} | Recipient: {} | Resend ID: {}", response.statusCode(), recipientEmail, resendId);
                     return resendId;
                 } else {
-                    String errorMsg = String.format("Resend API rejected with HTTP %d: %s", response.statusCode(), response.body());
-                    log.error("[RESEND CLIENT] {}", errorMsg);
+                    String errorMsg = String.format("Resend API rejected HTTP %d: %s", response.statusCode(), response.body());
+                    log.error("[RESEND API -> RESULT] ERROR HTTP {} | Recipient: {} | Response: {}", response.statusCode(), recipientEmail, response.body());
                     throw new RuntimeException(errorMsg);
                 }
             } catch (Exception e) {
-                log.error("[RESEND CLIENT] Exception dispatching to {}: {}", recipientEmail, e.getMessage());
+                log.error("[RESEND API -> RESULT] EXCEPTION dispatching to {}: {}", recipientEmail, e.getMessage());
                 if (e instanceof RuntimeException) {
                     throw (RuntimeException) e;
                 }
                 throw new RuntimeException("Resend dispatch failed: " + e.getMessage(), e);
             }
         } else {
-            // Mock or Brevo fallback
             if (isProd) {
                 throw new IllegalStateException("CRITICAL PRODUCTION CONFIGURATION ERROR: Mock email provider cannot be active in production profile!");
             }

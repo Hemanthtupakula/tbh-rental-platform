@@ -56,9 +56,10 @@ tbh:
     key-secret: ${RAZORPAY_KEY_SECRET:}
     webhook-secret: ${RAZORPAY_WEBHOOK_SECRET:}
   email:
-    provider: ${TBH_EMAIL_PROVIDER:mock}
+    provider: ${TBH_EMAIL_PROVIDER:resend}
     api-key: ${RESEND_API_KEY:${TBH_EMAIL_API_KEY:}}
-    from: ${TBH_EMAIL_FROM:TBH Rentals <onboarding@resend.dev>}
+    from: ${RESEND_FROM_EMAIL:${TBH_EMAIL_FROM:TBH Rentals <onboarding@resend.dev>}}
+    admin-email: ${ADMIN_EMAIL:${TBH_ADMIN_EMAIL:admin@tbhrentals.in}}
   kyc:
     provider: ${TBH_KYC_PROVIDER:production}
   imagekit:

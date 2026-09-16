@@ -71,6 +71,22 @@ public class SupportService {
         );
         messageRepository.save(initialMsg);
 
+        if (notificationOutboxService != null && user.getEmail() != null) {
+            Map<String, Object> payload = Map.of(
+                    "customerName", user.getFullName() != null ? user.getFullName() : "Rider",
+                    "ticketNumber", ticket.getTicketNumber(),
+                    "subject", ticket.getSubject()
+            );
+            notificationOutboxService.queueEvent(
+                    "SUPPORT_TICKET_CREATED",
+                    user.getEmail(),
+                    user.getFullName(),
+                    "support_ticket_created",
+                    payload,
+                    "SUPPORT_CR_" + ticket.getTicketNumber()
+            );
+        }
+
         return ticket;
     }
 
@@ -176,6 +192,21 @@ public class SupportService {
                         payload,
                         "SUPPORT_REPLY_" + ticket.getTicketNumber() + "_" + System.currentTimeMillis()
                 );
+
+                if ("RESOLVED".equalsIgnoreCase(ticket.getStatus()) || "CLOSED".equalsIgnoreCase(ticket.getStatus())) {
+                    Map<String, Object> resPayload = Map.of(
+                            "customerName", customer.getFullName() != null ? customer.getFullName() : "Rider",
+                            "ticketNumber", ticket.getTicketNumber()
+                    );
+                    notificationOutboxService.queueEvent(
+                            "SUPPORT_TICKET_RESOLVED",
+                            customer.getEmail(),
+                            customer.getFullName(),
+                            "support_ticket_resolved",
+                            resPayload,
+                            "SUPPORT_RES_" + ticket.getTicketNumber()
+                    );
+                }
             }
         }
 
