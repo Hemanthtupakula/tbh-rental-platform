@@ -292,14 +292,25 @@ public class KycService {
             kyc.setClassStatus(classValidator.evaluateClasses(set).name());
         }
 
-        // Submits to Admin Review
+        // Auto-verifies confirmed licence for instant rental eligibility
         String fromStatus = kyc.getVerificationStatus().name();
-        kyc.setVerificationStatus(KycVerificationStatus.PENDING_ADMIN_REVIEW);
+        kyc.setVerificationStatus(KycVerificationStatus.VERIFIED);
+        kyc.setVerifiedAt(LocalDateTime.now());
+        kyc.setReviewedBy("AUTO_VERIFIER");
+        kyc.setRejectionReason(null);
         kyc.setUpdatedAt(LocalDateTime.now());
+
+        User user = kyc.getUser();
+        user.setDrivingLicenseVerified(true);
+        if (kyc.getEncryptedLicenseNumber() != null && !kyc.getEncryptedLicenseNumber().isBlank()) {
+            user.setDrivingLicenseNumber(kyc.getEncryptedLicenseNumber());
+        }
+        userRepository.save(user);
+
         LicenseVerification saved = kycRepository.save(kyc);
 
-        recordAuditEvent(saved, kyc.getUser(), "SUBMITTED_FOR_REVIEW", kyc.getUser().getEmail(),
-                fromStatus, KycVerificationStatus.PENDING_ADMIN_REVIEW.name(), "Customer confirmed details and submitted for admin review.");
+        recordAuditEvent(saved, user, "AUTO_APPROVED", "SYSTEM",
+                fromStatus, KycVerificationStatus.VERIFIED.name(), "Auto-approved confirmed driving licence details.");
 
         return saved;
     }

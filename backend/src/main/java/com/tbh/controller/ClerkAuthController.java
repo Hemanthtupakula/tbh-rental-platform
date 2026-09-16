@@ -47,11 +47,23 @@ public class ClerkAuthController {
                 clerkService.syncUserMobileVerification(user);
             }
 
-            // Auto-elevate platform owner to ROLE_ADMIN on every sync (idempotent)
-            if ("tupakulahemanth828@gmail.com".equalsIgnoreCase(user.getEmail())
-                    && user.getRole() != com.tbh.entity.Role.ROLE_ADMIN) {
-                user.setRole(com.tbh.entity.Role.ROLE_ADMIN);
-                userRepository.save(user);
+            // Auto-elevate platform owner to ROLE_ADMIN & auto-verify DL on every sync (idempotent)
+            if ("tupakulahemanth828@gmail.com".equalsIgnoreCase(user.getEmail())) {
+                boolean saveNeeded = false;
+                if (user.getRole() != com.tbh.entity.Role.ROLE_ADMIN) {
+                    user.setRole(com.tbh.entity.Role.ROLE_ADMIN);
+                    saveNeeded = true;
+                }
+                if (!user.isDrivingLicenseVerified()) {
+                    user.setDrivingLicenseVerified(true);
+                    if (user.getDrivingLicenseNumber() == null || user.getDrivingLicenseNumber().isBlank()) {
+                        user.setDrivingLicenseNumber("AP20320250001194");
+                    }
+                    saveNeeded = true;
+                }
+                if (saveNeeded) {
+                    userRepository.save(user);
+                }
             }
 
             resp.put("id", user.getId());
