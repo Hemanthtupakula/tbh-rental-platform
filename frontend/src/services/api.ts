@@ -3168,6 +3168,25 @@ export const api = {
     });
   },
 
+  /** Send Wakit WhatsApp OTP to phone number for mobile verification at booking */
+  async sendMobileOtp(phoneNumber: string): Promise<{ message: string; expiresInSeconds: number }> {
+    return await apiFetch<{ message: string; expiresInSeconds: number }>('/auth/send-otp', {
+      method: 'POST',
+      body: JSON.stringify({ phoneNumber })
+    });
+  },
+
+  /** Verify Wakit WhatsApp OTP; on success backend marks user mobileVerified=true */
+  async verifyMobileOtp(phoneNumber: string, otp: string): Promise<{ mobileVerified: boolean; phoneNumber?: string }> {
+    const res = await apiFetch<any>('/auth/verify-otp', {
+      method: 'POST',
+      body: JSON.stringify({ phoneNumber, otp })
+    });
+    return { mobileVerified: true, phoneNumber: res.phoneNumber ?? phoneNumber };
+  },
+
+
+
   async getAdminOverview(): Promise<AdminMetrics> {
     return await apiFetch<AdminMetrics>('/admin/overview');
   },

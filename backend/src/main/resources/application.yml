@@ -41,7 +41,9 @@ tbh:
   security:
     allowed-origins: ${TBH_ALLOWED_ORIGINS:https://tbh-rental-platform.pages.dev,http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173}
   otp:
-    provider: ${TBH_OTP_PROVIDER:sms}
+    provider: ${TBH_OTP_PROVIDER:wakit}
+  wakit:
+    api-key: ${WAKIT_API_KEY:}
   sms:
     api-key: ${TBH_SMS_API_KEY:}
     sender-id: ${TBH_SMS_SENDER_ID:TBHIND}
@@ -111,7 +113,9 @@ tbh:
   security:
     allowed-origins: ${TBH_ALLOWED_ORIGINS:https://tbh-rental-platform.pages.dev,http://localhost,http://localhost:80,http://localhost:3000,http://localhost:5173,http://127.0.0.1}
   otp:
-    provider: ${TBH_OTP_PROVIDER:sms}
+    provider: ${TBH_OTP_PROVIDER:wakit}
+  wakit:
+    api-key: ${WAKIT_API_KEY:}
   sms:
     api-key: ${TBH_SMS_API_KEY:}
     sender-id: ${TBH_SMS_SENDER_ID:TBHIND}
