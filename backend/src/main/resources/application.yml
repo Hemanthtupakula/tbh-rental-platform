@@ -65,7 +65,7 @@ tbh:
   imagekit:
     endpoint: ${IMAGEKIT_URL_ENDPOINT:https://ik.imagekit.io/hemanthhkt}
     public-key: ${IMAGEKIT_PUBLIC_KEY:public_NS0dUSt2SSRtcWhuLkyPHEKUjz0=}
-    private-key: ${IMAGEKIT_PRIVATE_KEY:}
+    private-key: ${IMAGEKIT_PRIVATE_KEY:private_4+QFj7YnGA5RXndCo3k5JW4zUDM=}
     id: ${IMAGEKIT_ID:hemanthhkt}
   clerk:
     issuer: ${CLERK_ISSUER:https://deep-zebra-6151.clerk.accounts.dev}
