@@ -38,44 +38,48 @@ public class TesseractOcrProvider implements DlOcrProvider {
 
     @Override
     public synchronized boolean isAvailable() {
-        if (available != null) {
-            return available;
+        if (available != null && available) {
+            return true;
         }
 
-        String cmd = resolveCommand();
-        try {
-            Process process = new ProcessBuilder(cmd, "--version")
-                    .redirectErrorStream(true)
-                    .start();
+        java.util.List<String> candidates = new java.util.ArrayList<>();
+        if (tesseractCmd != null && !tesseractCmd.isBlank() && !"tesseract".equals(tesseractCmd)) {
+            candidates.add(tesseractCmd.trim());
+        }
+        String envCmd = System.getenv("TESSERACT_CMD");
+        if (envCmd != null && !envCmd.isBlank()) {
+            candidates.add(envCmd.trim());
+        }
+        candidates.add("tesseract");
+        candidates.add("/usr/bin/tesseract");
+        candidates.add("/usr/local/bin/tesseract");
+        candidates.add("C:\\Program Files\\Tesseract-OCR\\tesseract.exe");
+        candidates.add("C:\\Program Files (x86)\\Tesseract-OCR\\tesseract.exe");
 
-            boolean finished = process.waitFor(5, TimeUnit.SECONDS);
-            if (finished && process.exitValue() == 0) {
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                    String line = reader.readLine();
-                    this.detectedVersion = (line != null) ? line.trim() : "Tesseract (unknown version)";
+        for (String cmd : candidates) {
+            try {
+                Process process = new ProcessBuilder(cmd, "--version")
+                        .redirectErrorStream(true)
+                        .start();
+
+                boolean finished = process.waitFor(5, TimeUnit.SECONDS);
+                if (finished && process.exitValue() == 0) {
+                    try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                        String line = reader.readLine();
+                        this.detectedVersion = (line != null) ? line.trim() : "Tesseract (unknown version)";
+                    }
+                    this.tesseractCmd = cmd;
+                    this.available = true;
+                    log.info("[TESSERACT OCR] Detected working OCR engine: {} using command '{}'", detectedVersion, cmd);
+                    return true;
                 }
-                this.available = true;
-                log.info("[TESSERACT OCR] Detected working OCR engine: {} using command '{}'", detectedVersion, cmd);
-                return true;
-            }
-        } catch (Exception e) {
-            log.warn("[TESSERACT OCR] Engine check failed for command '{}': {}", cmd, e.getMessage());
-        }
-
-        // Try standard Windows default fallback if 'tesseract' plain command failed
-        if (!cmd.contains("Tesseract-OCR")) {
-            File winDefault = new File("C:\\Program Files\\Tesseract-OCR\\tesseract.exe");
-            if (winDefault.exists() && winDefault.canExecute()) {
-                this.tesseractCmd = winDefault.getAbsolutePath();
-                this.available = true;
-                this.detectedVersion = "Tesseract OCR (Windows Path)";
-                log.info("[TESSERACT OCR] Resolved fallback executable at '{}'", tesseractCmd);
-                return true;
+            } catch (Exception e) {
+                // Try next candidate
             }
         }
 
         this.available = false;
-        log.warn("[TESSERACT OCR] Engine is UNAVAILABLE. All OCR requests will fail-closed with OCR_UNAVAILABLE status.");
+        log.warn("[TESSERACT OCR] Engine is UNAVAILABLE across all candidates. All OCR requests will fail-closed with OCR_UNAVAILABLE status.");
         return false;
     }
 

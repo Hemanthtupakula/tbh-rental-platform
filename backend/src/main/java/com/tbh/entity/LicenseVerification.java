@@ -42,6 +42,10 @@ public class LicenseVerification {
     @JsonIgnore
     private String backDocumentPath;
 
+    private String imageKitFrontUrl;
+
+    private String imageKitBackUrl;
+
     private String provider = "MANUAL_ADMIN";
 
     private String providerReference;
@@ -126,6 +130,12 @@ public class LicenseVerification {
 
     public String getBackDocumentPath() { return backDocumentPath; }
     public void setBackDocumentPath(String backDocumentPath) { this.backDocumentPath = backDocumentPath; }
+
+    public String getImageKitFrontUrl() { return imageKitFrontUrl; }
+    public void setImageKitFrontUrl(String imageKitFrontUrl) { this.imageKitFrontUrl = imageKitFrontUrl; }
+
+    public String getImageKitBackUrl() { return imageKitBackUrl; }
+    public void setImageKitBackUrl(String imageKitBackUrl) { this.imageKitBackUrl = imageKitBackUrl; }
 
     public String getProvider() { return provider; }
     public void setProvider(String provider) { this.provider = provider; }

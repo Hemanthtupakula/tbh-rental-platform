@@ -55,6 +55,7 @@ public class KycService {
     private String kycProvider;
 
     private final com.tbh.service.email.EmailService emailService;
+    private final com.tbh.service.media.ImageKitService imageKitService;
 
     public KycService(LicenseVerificationRepository kycRepository,
                       UserRepository userRepository,
@@ -66,7 +67,8 @@ public class KycService {
                       @Autowired(required = false) DlFormatValidator formatValidator,
                       @Autowired(required = false) DlDateValidator dateValidator,
                       @Autowired(required = false) VehicleClassValidator classValidator,
-                      @Autowired(required = false) com.tbh.service.email.EmailService emailService) {
+                      @Autowired(required = false) com.tbh.service.email.EmailService emailService,
+                      @Autowired(required = false) com.tbh.service.media.ImageKitService imageKitService) {
         this.kycRepository = kycRepository;
         this.userRepository = userRepository;
         this.kycVerificationService = kycVerificationService;
@@ -78,6 +80,7 @@ public class KycService {
         this.dateValidator = dateValidator != null ? dateValidator : new DlDateValidator();
         this.classValidator = classValidator != null ? classValidator : new VehicleClassValidator();
         this.emailService = emailService;
+        this.imageKitService = imageKitService;
         try {
             Files.createDirectories(kycStorageDir);
         } catch (IOException ignored) {
@@ -204,6 +207,21 @@ public class KycService {
             backDiskFile = new File(backPath);
         }
 
+        if (imageKitService != null) {
+            try {
+                if (frontFile != null && !frontFile.isEmpty()) {
+                    String ikFront = imageKitService.uploadFile(frontFile.getBytes(), "kyc_" + userId + "_front_" + System.currentTimeMillis() + ".png", "tbh/kyc", List.of("kyc", "front", "user_" + userId));
+                    if (ikFront != null) kyc.setImageKitFrontUrl(ikFront);
+                }
+                if (backFile != null && !backFile.isEmpty()) {
+                    String ikBack = imageKitService.uploadFile(backFile.getBytes(), "kyc_" + userId + "_back_" + System.currentTimeMillis() + ".png", "tbh/kyc", List.of("kyc", "back", "user_" + userId));
+                    if (ikBack != null) kyc.setImageKitBackUrl(ikBack);
+                }
+            } catch (Exception e) {
+                log.warn("[KYC IMAGEKIT] ImageKit upload skipped or failed: {}", e.getMessage());
+            }
+        }
+
         // 1. Document Quality Check (front and back)
         DocumentQualityAnalyzer.QualityReport frontQuality = (frontDiskFile != null)
                 ? qualityAnalyzer.analyzeImage(frontDiskFile)
@@ -297,25 +315,33 @@ public class KycService {
         String extractedDl = kyc.getExtractedLicenseNumber();
         String currentDl = kyc.getEncryptedLicenseNumber();
 
-        boolean ocrMatches = false;
-        if ("OCR_SUCCESS".equalsIgnoreCase(kyc.getOcrStatus()) && extractedDl != null && currentDl != null && !extractedDl.isBlank()) {
+        boolean isOcrSuccess = "OCR_SUCCESS".equalsIgnoreCase(kyc.getOcrStatus());
+        boolean hasDocuments = (kyc.getPrivateDocumentPath() != null || kyc.getImageKitFrontUrl() != null)
+                && (kyc.getBackDocumentPath() != null || kyc.getImageKitBackUrl() != null);
+        boolean isNotExpired = kyc.getExpiryDate() == null || !kyc.getExpiryDate().isBefore(LocalDate.now());
+
+        boolean ocrDlMatches = false;
+        if (isOcrSuccess && extractedDl != null && currentDl != null && !extractedDl.isBlank()) {
             String cleanExtracted = extractedDl.replaceAll("[^A-Za-z0-9]", "").toUpperCase();
             String cleanCurrent = currentDl.replaceAll("[^A-Za-z0-9]", "").toUpperCase();
             if (cleanExtracted.equalsIgnoreCase(cleanCurrent) || cleanCurrent.contains(cleanExtracted) || cleanExtracted.contains(cleanCurrent)) {
-                ocrMatches = true;
+                ocrDlMatches = true;
             }
         }
 
         boolean isValidFormat = "VALID_FORMAT".equalsIgnoreCase(kyc.getFormatStatus()) 
+                || "FORMAT_VALID".equalsIgnoreCase(kyc.getFormatStatus())
                 || (currentDl != null && currentDl.replaceAll("[^A-Za-z0-9]", "").length() >= 10);
-        boolean isNotExpired = kyc.getExpiryDate() == null || !kyc.getExpiryDate().isBefore(LocalDate.now());
 
-        if ((ocrMatches || "OCR_SUCCESS".equalsIgnoreCase(kyc.getOcrStatus())) && isValidFormat && isNotExpired) {
+        boolean autoApproveEligible = isOcrSuccess && hasDocuments && ocrDlMatches && isValidFormat && isNotExpired;
+
+        if (autoApproveEligible) {
             // Immediate Auto-Approval on OCR Match
             kyc.setVerificationStatus(KycVerificationStatus.VERIFIED);
             kyc.setVerifiedAt(LocalDateTime.now());
             kyc.setReviewedBy("AUTO_OCR_MATCH");
             kyc.setRejectionReason(null);
+            kyc.setReviewNotes("KYC Auto-Approved: OCR verified front/back document match, valid expiry date, and licence number match.");
             kyc.setUpdatedAt(LocalDateTime.now());
 
             User user = kyc.getUser();
@@ -326,17 +352,31 @@ public class KycService {
             userRepository.save(user);
 
             LicenseVerification saved = kycRepository.save(kyc);
-            recordAuditEvent(saved, user, "AUTO_APPROVED", "OCR_SYSTEM",
+            recordAuditEvent(saved, user, "KYC_AUTO_APPROVED", "AUTO_OCR_MATCH",
                     fromStatus, KycVerificationStatus.VERIFIED.name(), "OCR details matched document photo. Immediate approval granted.");
             return saved;
         } else {
-            // Queue for manual Admin Inspection if OCR mismatch or incomplete
+            // Queue for manual Admin Inspection if OCR mismatch, OCR_UNAVAILABLE, or incomplete
+            String reviewReasonNotes;
+            if (!isOcrSuccess) {
+                reviewReasonNotes = "OCR engine unavailable or incomplete text extraction — queued for manual admin review.";
+            } else if (!hasDocuments) {
+                reviewReasonNotes = "Missing front or back document images — queued for manual admin review.";
+            } else if (!ocrDlMatches) {
+                reviewReasonNotes = "DL number mismatch between OCR (" + extractedDl + ") and customer entry (" + currentDl + ") — queued for manual admin review.";
+            } else if (!isNotExpired) {
+                reviewReasonNotes = "Driving licence is expired — queued for manual admin review.";
+            } else {
+                reviewReasonNotes = "Customer details queued for manual admin inspection.";
+            }
+
             kyc.setVerificationStatus(KycVerificationStatus.PENDING_ADMIN_REVIEW);
+            kyc.setReviewNotes(reviewReasonNotes);
             kyc.setUpdatedAt(LocalDateTime.now());
 
             LicenseVerification saved = kycRepository.save(kyc);
             recordAuditEvent(saved, kyc.getUser(), "SUBMITTED_FOR_REVIEW", kyc.getUser().getEmail(),
-                    fromStatus, KycVerificationStatus.PENDING_ADMIN_REVIEW.name(), "Customer details queued for manual admin inspection.");
+                    fromStatus, KycVerificationStatus.PENDING_ADMIN_REVIEW.name(), reviewReasonNotes);
             return saved;
         }
     }
