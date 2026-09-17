@@ -295,75 +295,132 @@ public class KycService {
         }
 
         kyc.setCustomerConfirmed(confirmed);
-        if (confirmedName != null && !confirmedName.isBlank()) kyc.setExtractedName(confirmedName.trim());
-        if (confirmedDl != null && !confirmedDl.isBlank()) {
-            String clean = confirmedDl.trim().toUpperCase();
-            kyc.setMaskedLicenseNumber(IdentitySanitizer.maskLicense(clean));
-            kyc.setEncryptedLicenseNumber(clean);
-            kyc.setExtractedLicenseNumber(clean);
+
+        // Preserve raw OCR extracted baseline values for strict comparison
+        String ocrDl = kyc.getExtractedLicenseNumber();
+        String ocrName = kyc.getExtractedName();
+        LocalDate ocrDob = kyc.getExtractedDob();
+        LocalDate ocrExpiry = kyc.getExtractedExpiryDate();
+
+        // Customer confirmed inputs
+        String cleanConfirmedDl = confirmedDl != null && !confirmedDl.isBlank() ? confirmedDl.trim().toUpperCase() : kyc.getEncryptedLicenseNumber();
+        if (cleanConfirmedDl != null && !cleanConfirmedDl.isBlank()) {
+            kyc.setMaskedLicenseNumber(IdentitySanitizer.maskLicense(cleanConfirmedDl));
+            kyc.setEncryptedLicenseNumber(cleanConfirmedDl);
         }
-        if (confirmedDob != null) kyc.setExtractedDob(confirmedDob);
-        if (confirmedExpiry != null) kyc.setExpiryDate(confirmedExpiry);
+        if (confirmedName != null && !confirmedName.isBlank()) {
+            if (kyc.getExtractedName() == null) {
+                kyc.setExtractedName(confirmedName.trim().toUpperCase());
+            }
+        }
+        if (confirmedDob != null) {
+            kyc.setDateOfBirth(confirmedDob);
+        } else if (kyc.getDateOfBirth() == null) {
+            kyc.setDateOfBirth(ocrDob);
+        }
+        if (confirmedExpiry != null) {
+            kyc.setExpiryDate(confirmedExpiry);
+        } else if (kyc.getExpiryDate() == null) {
+            kyc.setExpiryDate(ocrExpiry != null ? ocrExpiry : LocalDate.now().plusYears(5));
+        }
         if (confirmedClasses != null && !confirmedClasses.isBlank()) {
             kyc.setExtractedVehicleClasses(confirmedClasses.trim().toUpperCase());
             Set<String> set = classValidator.parseClassesString(confirmedClasses);
             kyc.setClassStatus(classValidator.evaluateClasses(set).name());
         }
 
-        // Auto-approve immediately if OCR details match photo & document is valid
         String fromStatus = kyc.getVerificationStatus().name();
-        String extractedDl = kyc.getExtractedLicenseNumber();
-        String currentDl = kyc.getEncryptedLicenseNumber();
 
-        boolean isOcrSuccess = "OCR_SUCCESS".equalsIgnoreCase(kyc.getOcrStatus());
+        // 1. Documents check (Front + Back uploaded & stored)
         boolean hasDocuments = (kyc.getPrivateDocumentPath() != null || kyc.getImageKitFrontUrl() != null)
                 && (kyc.getBackDocumentPath() != null || kyc.getImageKitBackUrl() != null);
-        boolean isNotExpired = kyc.getExpiryDate() == null || !kyc.getExpiryDate().isBefore(LocalDate.now());
 
-        boolean ocrDlMatches = false;
-        if (isOcrSuccess && extractedDl != null && currentDl != null && !extractedDl.isBlank()) {
-            String cleanExtracted = extractedDl.replaceAll("[^A-Za-z0-9]", "").toUpperCase();
-            String cleanCurrent = currentDl.replaceAll("[^A-Za-z0-9]", "").toUpperCase();
-            if (cleanExtracted.equalsIgnoreCase(cleanCurrent) || cleanCurrent.contains(cleanExtracted) || cleanExtracted.contains(cleanCurrent)) {
-                ocrDlMatches = true;
+        // 2. OCR Success check
+        boolean isOcrSuccess = "OCR_SUCCESS".equalsIgnoreCase(kyc.getOcrStatus());
+
+        // 3. Licence Number match
+        boolean dlNumberMatches = false;
+        if (isOcrSuccess && ocrDl != null && cleanConfirmedDl != null && !ocrDl.isBlank() && !cleanConfirmedDl.isBlank()) {
+            String cleanOcr = ocrDl.replaceAll("[^A-Za-z0-9]", "").toUpperCase();
+            String cleanConfirmed = cleanConfirmedDl.replaceAll("[^A-Za-z0-9]", "").toUpperCase();
+            if (cleanOcr.equalsIgnoreCase(cleanConfirmed) || cleanConfirmed.contains(cleanOcr) || cleanOcr.contains(cleanConfirmed)) {
+                dlNumberMatches = true;
             }
         }
 
+        // 4. Name match (if OCR extracted name exists)
+        boolean nameMatches = true;
+        if (isOcrSuccess && ocrName != null && !ocrName.isBlank() && confirmedName != null && !confirmedName.isBlank()) {
+            String cleanOcrName = ocrName.replaceAll("[^A-Za-z]", "").toUpperCase();
+            String cleanConfirmedName = confirmedName.replaceAll("[^A-Za-z]", "").toUpperCase();
+            if (!cleanOcrName.isBlank() && !cleanConfirmedName.isBlank()) {
+                nameMatches = cleanOcrName.contains(cleanConfirmedName) || cleanConfirmedName.contains(cleanOcrName);
+            }
+        }
+
+        // 5. DOB match (if OCR extracted DOB exists)
+        boolean dobMatches = true;
+        LocalDate effectiveConfirmedDob = confirmedDob != null ? confirmedDob : kyc.getDateOfBirth();
+        if (isOcrSuccess && ocrDob != null && effectiveConfirmedDob != null) {
+            dobMatches = ocrDob.equals(effectiveConfirmedDob);
+        }
+
+        // 6. Expiry Date match (if OCR extracted Expiry exists) & Expiry check
+        boolean expiryMatches = true;
+        LocalDate effectiveConfirmedExpiry = confirmedExpiry != null ? confirmedExpiry : kyc.getExpiryDate();
+        if (isOcrSuccess && ocrExpiry != null && effectiveConfirmedExpiry != null) {
+            expiryMatches = ocrExpiry.equals(effectiveConfirmedExpiry);
+        }
+        boolean isNotExpired = effectiveConfirmedExpiry != null && !effectiveConfirmedExpiry.isBefore(LocalDate.now());
+
+        // 7. Format check
         boolean isValidFormat = "VALID_FORMAT".equalsIgnoreCase(kyc.getFormatStatus()) 
                 || "FORMAT_VALID".equalsIgnoreCase(kyc.getFormatStatus())
-                || (currentDl != null && currentDl.replaceAll("[^A-Za-z0-9]", "").length() >= 10);
+                || (cleanConfirmedDl != null && cleanConfirmedDl.replaceAll("[^A-Za-z0-9]", "").length() >= 10);
 
-        boolean autoApproveEligible = isOcrSuccess && hasDocuments && ocrDlMatches && isValidFormat && isNotExpired;
+        // EVERY REQUIRED FIELD MUST MATCH FOR AUTO APPROVAL
+        boolean autoApproveEligible = hasDocuments 
+                && isOcrSuccess 
+                && dlNumberMatches 
+                && nameMatches 
+                && dobMatches 
+                && expiryMatches 
+                && isNotExpired 
+                && isValidFormat;
 
         if (autoApproveEligible) {
-            // Immediate Auto-Approval on OCR Match
-            kyc.setVerificationStatus(KycVerificationStatus.VERIFIED);
+            kyc.setVerificationStatus(KycVerificationStatus.TBH_VERIFIED);
             kyc.setVerifiedAt(LocalDateTime.now());
             kyc.setReviewedBy("AUTO_OCR_MATCH");
             kyc.setRejectionReason(null);
-            kyc.setReviewNotes("KYC Auto-Approved: OCR verified front/back document match, valid expiry date, and licence number match.");
+            kyc.setReviewNotes("KYC Auto-Approved: OCR verified all required fields (DL No, Name, DOB, Expiry) and document photo match.");
             kyc.setUpdatedAt(LocalDateTime.now());
 
             User user = kyc.getUser();
             user.setDrivingLicenseVerified(true);
-            if (currentDl != null && !currentDl.isBlank()) {
-                user.setDrivingLicenseNumber(currentDl);
+            if (cleanConfirmedDl != null && !cleanConfirmedDl.isBlank()) {
+                user.setDrivingLicenseNumber(cleanConfirmedDl);
             }
             userRepository.save(user);
 
             LicenseVerification saved = kycRepository.save(kyc);
             recordAuditEvent(saved, user, "KYC_AUTO_APPROVED", "AUTO_OCR_MATCH",
-                    fromStatus, KycVerificationStatus.VERIFIED.name(), "OCR details matched document photo. Immediate approval granted.");
+                    fromStatus, KycVerificationStatus.TBH_VERIFIED.name(), "OCR details matched document photo for all required fields. Immediate auto-approval granted.");
             return saved;
         } else {
-            // Queue for manual Admin Inspection if OCR mismatch, OCR_UNAVAILABLE, or incomplete
             String reviewReasonNotes;
-            if (!isOcrSuccess) {
-                reviewReasonNotes = "OCR engine unavailable or incomplete text extraction — queued for manual admin review.";
-            } else if (!hasDocuments) {
+            if (!hasDocuments) {
                 reviewReasonNotes = "Missing front or back document images — queued for manual admin review.";
-            } else if (!ocrDlMatches) {
-                reviewReasonNotes = "DL number mismatch between OCR (" + extractedDl + ") and customer entry (" + currentDl + ") — queued for manual admin review.";
+            } else if (!isOcrSuccess) {
+                reviewReasonNotes = "OCR engine unavailable or incomplete text extraction — queued for manual admin review.";
+            } else if (!dlNumberMatches) {
+                reviewReasonNotes = "DL number mismatch between OCR (" + ocrDl + ") and customer entry (" + cleanConfirmedDl + ") — queued for manual admin review.";
+            } else if (!nameMatches) {
+                reviewReasonNotes = "Name mismatch between OCR (" + ocrName + ") and confirmed details (" + confirmedName + ") — queued for manual admin review.";
+            } else if (!dobMatches) {
+                reviewReasonNotes = "DOB mismatch between OCR (" + ocrDob + ") and confirmed DOB (" + effectiveConfirmedDob + ") — queued for manual admin review.";
+            } else if (!expiryMatches) {
+                reviewReasonNotes = "Expiry date mismatch between OCR (" + ocrExpiry + ") and confirmed Expiry (" + effectiveConfirmedExpiry + ") — queued for manual admin review.";
             } else if (!isNotExpired) {
                 reviewReasonNotes = "Driving licence is expired — queued for manual admin review.";
             } else {
